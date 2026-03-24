@@ -10,12 +10,12 @@
 ## 📊 Estado General
 
 ```
-Backend (Laravel):    ██████████ 100% COMPLETADO ✅ ACTUALIZADO
+Backend (Laravel):    ██████████ 100% COMPLETADO ✅
 DevOps & Deploy:      ██████████ 100% COMPLETADO ✅
-Frontend (Nuxt):      ░░░░░░░░░░ 0% (No iniciado)
+Frontend (Nuxt):      ████░░░░░░ 40% (Scaffold + Core Pages) ✨ NUEVO
 Testing:              ░░░░░░░░░░ 0% (No iniciado)
 ─────────────────────────────────────────────
-PROYECTO TOTAL:       ██████░░░░ 50% COMPLETADO
+PROYECTO TOTAL:       ███████░░░ 60% COMPLETADO
 ```
 
 ---
@@ -395,9 +395,270 @@ ae31f02 - feat: production deployment system with auto-migrations
 - Archivos de configuración sensibles
 - Logs y caché
 
+## ✅ FASE 3: FRONTEND NUXT 3 SCAFFOLD (COMPLETADO)
+
+### 3.1 Proyecto Nuxt 3 Inicializado ✅ COMPLETADO
+**Ubicación:** [frontend/](frontend/)
+
+**Stack:**
+- Nuxt 3 (v3.x)
+- Vue 3 Composition API
+- TypeScript (strict mode)
+- Tailwind CSS v3
+- Pinia (state management)
+- Axios (HTTP client)
+
+**Estructura de directorios:**
+```
+frontend/
+├── app.vue                    # Layout raíz con NavBar
+├── nuxt.config.ts             # Configuración Nuxt (SSR, modules, runtime config)
+├── tsconfig.json              # TypeScript estricto
+├── tailwind.config.js         # Temas personalizados (colores, utilities)
+├── postcss.config.js          # PostCSS pipeline
+├── package.json               # Dependencias
+├── .env.example               # Template de variables de entorno
+├── README.md                  # Documentación
+├── Dockerfile                 # Build Docker (2 stages)
+│
+├── pages/                     # Rutas Nuxt auto-mapping
+│   ├── index.vue              # 🏠 Landing page (hero, features, CTA)
+│   ├── app.vue                # Layout principal
+│   ├── auth/
+│   │   ├── login.vue          # 🔐 Login form (email, password)
+│   │   └── signup.vue         # 📝 Registro (company_name, email, password)
+│   │
+│   ├── dashboard/
+│   │   ├── index.vue          # 📊 Dashboard home (stats, navigation)
+│   │   ├── sms.vue            # 📱 SMS sender (recipients, message, calc)
+│   │   ├── credits.vue        # 💳 Packages (4 tiers + history)
+│   │   ├── email.vue          # 📧 [TODO] Email sender form
+│   │   ├── audio.vue          # 📞 [TODO] Audio IVR sender form
+│   │   └── settings.vue       # ⚙️ [TODO] Account settings
+│   │
+│   └── admin/
+│       └── index.vue          # 👨‍💼 Admin dashboard (tabs, pricing rules)
+│
+├── components/
+│   └── NavBar.vue             # 🧭 Navigation bar (responsive, mobile toggle)
+│
+├── composables/               # Logic hooks
+│   ├── useApi.ts              # ✅ Axios + interceptors (auth header, 401 handling)
+│   ├── useAuth.ts             # ✅ Auth logic (login, signup, logout)
+│   └── useCredits.ts          # ✅ Credits & packages management
+│
+├── stores/
+│   └── auth.ts                # ✅ Pinia store (user, token, tenant, role getters)
+│
+├── middleware/
+│   └── auth.ts                # ✅ Route protection (private routes redirect)
+│
+└── assets/css/
+    └── main.css               # 🎨 Tailwind imports + custom classes
+```
+
+### 3.2 Configuración ✅ COMPLETADO
+- [x] Nuxt 3 + Vue 3 con SSR habilitado
+- [x] TypeScript modo strict
+- [x] Tailwind CSS con custom theme (primary, secondary, accent, danger)
+- [x] Pinia para state management
+- [x] Axios con interceptores (inyecta token auth automáticamente)
+- [x] Runtime config para `NUXT_PUBLIC_API_BASE_URL` (default: http://localhost:8000/api)
+
+### 3.3 Composables ✅ COMPLETADO
+
+| Composable | Métodos | Función |
+|-----------|---------|---------|
+| **useApi** | `useApi()` | Retorna instancia axios + interceptores |
+| | `useApiCall(method, url, data)` | Quick API call wrapper |
+| **useAuth** | `register(company_name, email, password)` | Crea nuevo tenant + user |
+| | `login(email, password)` | Obtiene JWT token |
+| | `logout()` | Limpia token y store |
+| | `getMe()` | Obtiene datos del user actual |
+| | `computed: isAuthenticated` | Getter booleano |
+| | `computed: user` | Getter con datos del user |
+| | `computed: tenant` | Getter con datos del tenant |
+| **useCredits** | `getBalance()` | Obtiene saldo actual |
+| | `getPackages()` | Obtiene paquetes disponibles |
+| | `purchaseCredits(package_id)` | Inicia compra |
+| | `getTransactions()` | Historial de transacciones |
+
+### 3.4 Pinia Store ✅ COMPLETADO
+
+**auth.ts** - Estado centralizado de autenticación
+```typescript
+State:
+- user: { id, email, name, role, tenant_id } | null
+- token: string | null
+- tenant: { id, name, status, plan } | null
+
+Actions:
+- setUser(user)
+- setToken(token)
+- setTenant(tenant)
+- logout()
+- hydrate()  // Restaura del localStorage
+
+Getters:
+- isAuthenticated -> boolean
+- isSuperAdmin -> boolean
+- isAdmin -> boolean
+```
+
+### 3.5 Route Middleware ✅ COMPLETADO
+
+**auth.ts** - Protección de rutas
+```typescript
+- Rutas públicas: /, /auth/*, (permitidas sin autenticación)
+- Rutas privadas: /dashboard/*, /admin/* (redirigen a /auth/login si no autenticado)
+- Admin routes: /admin/* (solo accesible si isAdmin == true)
+- Logout: Limpia token + redirect a /
+```
+
+### 3.6 Páginas ✅ COMPLETADO
+
+#### Landing Page (index.vue)
+- ✅ Hero section con CTA
+- ✅ Features grid (3 tiles)
+- ✅ Responsive design (mobile-first)
+
+#### Auth Pages
+
+**Login Page (auth/login.vue)**
+- ✅ Email + password input
+- ✅ Error display con validación
+- ✅ Loading state durante submit
+- ✅ Link a signup
+- ✅ Integración con useAuth().login()
+
+**Signup Page (auth/signup.vue)**
+- ✅ Company name, email, password, password confirmation
+- ✅ Validación: password == password_confirmation
+- ✅ Error handling
+- ✅ Success redirect a dashboard
+- ✅ Integración con useAuth().register()
+
+#### Dashboard Pages
+
+**Dashboard Home (dashboard/index.vue)**
+- ✅ Stats cards: balance actual, gasto del mes, plan actual
+- ✅ Navigation grid (6 tiles): SMS, Email, Audio, Credits, Settings, Admin
+- ✅ Admin tile solo visible si isSuperAdmin
+- ✅ Role-based access control
+
+**SMS Sender (dashboard/sms.vue)**
+- ✅ Recipients textarea (múltiples números)
+- ✅ Message input (1000 char limit)
+- ✅ Campaign name (opcional)
+- ✅ Real-time cost calculator:
+  - Partes de SMS (160 chars = 1 parte)
+  - Costo por SMS: $0.026 (configurable)
+  - Total estimado: recipients × partes × costo
+- ✅ Validation: créditos suficientes, números válidos
+- ✅ Send logic: POST a `/api/sms/send` o `/api/sms/bulk`
+- ✅ Error/success messages
+
+**Credits Page (dashboard/credits.vue)**
+- ✅ Balance display
+- ✅ 4 package tiers:
+  - Starter: 1,000 credits @ $10 (0.01 each)
+  - Growth: 5,000 credits @ $40 (0.008 each, 20% discount)
+  - Professional: 20,000 credits @ $130 (0.0065 each, 35% discount)
+  - Enterprise: Custom pricing (contact sales)
+- ✅ Click-to-select package
+- ✅ Purchase button (redirect a Stripe/PayU)
+- ✅ Transaction history table:
+  - Fecha, tipo (purchase/usage/refund), monto, saldo después
+  - Status badge (completed/pending/failed)
+
+#### Admin Pages
+
+**Admin Dashboard (admin/index.vue)**
+- ✅ Admin overview: total tenants, revenue this month, system health
+- ✅ Tabbed interface:
+  - Overview: Stats cards (tenants activos, revenue, avg credit usage)
+  - Tenants: Lista de tenants con status (active/suspended/trial)
+  - Pricing: Tabla de pricing rules global (SMS, Email, Audio)
+  - Audit: Logs de auditoría (acciones de admin)
+- ✅ Pricing rules table:
+  - Channel, provider, cost, margin %, selling price
+  - Edit/delete buttons (pending API integration)
+- ✅ Security: Redirect a dashboard si no es superadmin
+
+### 3.7 Componentes ✅ COMPLETADO
+
+**NavBar.vue**
+- ✅ Logo link to home
+- ✅ Desktop menu: Home, Dashboard (si autenticado)
+- ✅ Mobile responsive: hamburger toggle
+- ✅ User dropdown: Logout, Profile, Settings
+- ✅ Auth-aware: Different menu si logged in vs anonymous
+
+### 3.8 Styling ✅ COMPLETADO
+
+**Tailwind Configuration:**
+- ✅ Custom colors: primary (#3b82f6), secondary (#10b981), accent (#f59e0b), danger (#ef4444)
+- ✅ Custom fonts: Inter
+- ✅ Dark mode ready
+
+**Custom CSS Classes (main.css):**
+- ✅ `.btn-primary` - Primary action button
+- ✅ `.btn-secondary` - Secondary action button
+- ✅ `.card` - Card container
+- ✅ `.input-field` - Styled input
+- ✅ `.input-error` - Error state styling
+- ✅ Tailwind typograpy + responsive breakpoints (mobile-first)
+
+### 3.9 Docker ✅ COMPLETADO
+
+**Dockerfile (frontend/)**
+- ✅ Two-stage build (builder → runtime)
+- ✅ Node 18 Alpine builder para compile
+- ✅ Alpine runtime lean (~100MB)
+- ✅ Expone puerto 3000
+- ✅ Comando: `node .output/server/index.mjs` (SSR server)
+
+### 3.10 Documentación ✅ COMPLETADO
+
+**README.md (frontend/)**
+- ✅ Project structure explanation
+- ✅ Setup instructions: npm install, npm run dev
+- ✅ Build & deployment
+- ✅ Environment variables
+
+**Resources:**
+- ✅ .env.example con template de variables
+
 ---
 
-## ⏳ FASE 3: INICIALIZAR BASE DE DATOS (PRÓXIMO - DEPENDE DEL AMBIENTE)
+## ⏳ FASE 4: COMPLETAR FRONTEND (PRÓXIMO)
+
+### 4.1 Páginas Faltantes ⏳
+- [ ] `dashboard/email.vue` - Email sender form (similar a SMS)
+- [ ] `dashboard/audio.vue` - Audio/IVR sender form
+- [ ] `dashboard/settings.vue` - Account/profile settings
+
+### 4.2 Validación & UX ⏳
+- [ ] Zod o VeeValidate para validación de formularios
+- [ ] Loading skeletons while fetching
+- [ ] Toast notifications (error/success)
+- [ ] Error boundary component
+- [ ] Better error messages from API
+
+### 4.3 Testing Frontend ⏳
+- [ ] Unit tests (Vitest)
+- [ ] E2E tests (Playwright)
+- [ ] Auth flow testing
+
+### 4.4 Admin Features Integration ⏳
+- [ ] Fetch tenants from `/api/admin/tenants`
+- [ ] Manage pricing rules
+- [ ] View audit logs
+- [ ] Real-time analytics
+
+---
+
+## ⏳ FASE 5: INICIALIZAR BASE DE DATOS (PRÓXIMO - DEPENDE DEL AMBIENTE)
 
 ### 3.1 Despliegue en Servidor Linux ⏳ PRÓXIMO
 **Para ejecutar el deploy automatizado:**
@@ -455,9 +716,15 @@ El deploy.sh genera automáticamente y guarda en `/opt/nexus-saas/credentials.tx
 
 ---
 
-## 🎯 FASE 4: TESTING API (POST-MIGRACIONES)
+## ⏳ FASE 5-6: INICIALIZAR & TESTING (PRÓXIMO)
 
-### 4.1 Pruebas manuales con Postman/Insomnia ⏳
+### 5.1 Despliegue Base de Datos ⏳
+**Para ejecutar el deploy automatizado en servidor:**
+```bash
+curl -sL https://raw.githubusercontent.com/henry0295/nexus-saas/main/deploy.sh | sudo bash -s -- 192.168.1.100
+```
+
+### 5.2 Pruebas manuales con Postman/Insomnia ⏳
 
 **Test 1: Registro de nuevo tenant**
 ```http
@@ -469,24 +736,6 @@ Content-Type: application/json
   "email": "test@testcompany.com",
   "password": "SecurePass123!",
   "password_confirmation": "SecurePass123!"
-}
-
-Respuesta esperada:
-{
-  "user": {
-    "id": 2,
-    "email": "test@testcompany.com",
-    "role": "admin",
-    "tenant_id": 2
-  },
-  "tenant": {
-    "id": 2,
-    "name": "Test Company",
-    "status": "trial",
-    "plan": "starter"
-  },
-  "credits": 100,
-  "token": "JWT_TOKEN_HERE"
 }
 ```
 
@@ -500,138 +749,19 @@ Content-Type: application/json
   "phone": "+573001234567",
   "message": "Hola! Este es un test de SMS"
 }
-
-Respuesta esperada:
-{
-  "log_id": "UUID",
-  "phone": "573001234567",
-  "message_parts": 1,
-  "cost": 0.026,
-  "new_balance": 99.974,
-  "status": "pending"
-}
 ```
 
-**Test 3: Verificar balance de créditos**
-```http
-GET http://localhost:8000/api/credits/balance
-Authorization: Bearer JWT_TOKEN_HERE
-
-Respuesta esperada:
-{
-  "balance": 99.974,
-  "total_purchased": 0,
-  "total_used": 0.026
-}
-```
-
----
-
-## 🚀 FASE 5: CONTROLADORES COMPLEMENTARIOS (SIGUIENTE)
-
-### 5.1 SuperadminController ⏳
-**Propósito:** Gestión de tenants y precios desde panel admin  
-**Rutas:**
-```
-GET    /api/admin/tenants          # Listar todos los tenants
-GET    /api/admin/tenants/{id}     # Detalle de un tenant
-PATCH  /api/admin/tenants/{id}     # Actualizar estado/plan
-POST   /api/admin/pricing          # Crear/editar precios globales
-GET    /api/admin/dashboard        # Stats: ingresos, tenants activos, etc
-GET    /api/admin/audit-logs       # Ver auditoría
-```
-
-**Middleware:** `auth:sanctum` + `role:superadmin`
-
-### 5.2 CreditsController ⏳
-**Propósito:** Compra de créditos (integración con Stripe/PayU)  
-**Rutas:**
-```
-POST   /api/credits/purchase       # Iniciar compra de créditos
-GET    /api/credits/transactions   # Ver historial
-GET    /api/credits/packages       # Listar paquetes disponibles
-```
-
-### 5.3 AudioController ⏳
-**Propósito:** Integración con 360nrs para llamadas de audio  
-**Rutas:**
-```
-POST   /api/audio/send             # Enviar llamada de audio
-GET    /api/audio/logs             # Ver historial de llamadas
-```
-
----
-
-## 🎨 FASE 6: FRONTEND NUXT 3 (SIGUIENTE GRAN ETAPA)
-
-### 6.1 Inicializar proyecto Nuxt ⏳
+**Test 3: Frontend Login**
 ```bash
-npx nuxi@latest init ../nexus-saas-frontend
-cd ../nexus-saas-frontend
+cd frontend
 npm install
+npm run dev
+# Visit http://localhost:3000 and test login/signup forms
 ```
-
-**Estructura:**
-```
-nexus-saas-frontend/
-├── pages/
-│   ├── auth/
-│   │   ├── signup.vue
-│   │   ├── login.vue
-│   │   └── verify-email.vue
-│   ├── dashboard/
-│   │   ├── index.vue
-│   │   ├── sms.vue
-│   │   ├── email.vue
-│   │   ├── audio.vue
-│   │   └── credits.vue
-│   └── admin/
-│       ├── dashboard.vue
-│       ├── tenants.vue
-│       └── pricing.vue
-├── composables/
-│   ├── useAuth.ts
-│   ├── useCredits.ts
-│   └── useApi.ts
-├── stores/
-│   ├── auth.ts
-│   └── tenant.ts
-├── components/
-│   ├── AuthForm.vue
-│   ├── SmsForm.vue
-│   ├── EmailForm.vue
-│   └── BalanceCard.vue
-└── middleware/
-    ├── auth.ts
-    └── admin.ts
-```
-
-### 6.2 Autenticación Frontend ⏳
-- [x] Composable `useAuth()` con métodos: signup, login, logout, me
-- [x] Pinia store `auth.ts` con estado: user, token, isAuthenticated
-- [x] Middleware `auth.ts` para proteger rutas
-- [x] Almacenamiento seguro de JWT en `localStorage` / `sessionStorage`
-
-### 6.3 Páginas Core ⏳
-- [ ] **Signup:** Formulario con validación, crea Tenant + User
-- [ ] **Login:** Email + password, obtiene JWT token
-- [ ] **Verify Email:** Validación de email con código
-- [ ] **Dashboard:** Panel principal con opciones: SMS, Email, Audio, Credits
-- [ ] **Send SMS:** Formulario para enviar SMS (individual + bulk)
-- [ ] **Send Email:** Formulario para enviar emails (individual + bulk)
-- [ ] **Send Audio:** Formulario para enviar llamadas
-- [ ] **Buy Credits:** Integración con Stripe/PayU
-- [ ] **Admin Dashboard:** Para superadmin (stats, tenants, pricing)
-
-### 6.4 Integraciones UI ⏳
-- [ ] Nuxt UI v3 para componentes pre-hechos
-- [ ] TailwindCSS para estilos
-- [ ] VeeValidate para validación de formularios
-- [ ] TypeScript en todo el frontend
 
 ---
 
-## ⚙️ FASE 7: INTEGRACIONES CLOUD & PAGOS
+## ⏳ FASE 7: INTEGRACIONES CLOUD & PAGOS
 
 ### 7.1 AWS SES (Email) ⏳
 - [ ] Configurar dominio en AWS SES
@@ -727,41 +857,47 @@ tests/
 
 ## 📋 RESUMEN: ESTADO ACTUAL vs PRÓXIMAS ACCIONES
 
-### ✅ COMPLETADO (Fase 1 + Fase 2)
+### ✅ COMPLETADO (Fase 1 + Fase 2 + Fase 3)
 
 | Componente | Estado | Archivo |
 |-----------|--------|---------|
-| **Backend Core** | ✅ 80% | [app/](app/) |
+| **Backend Core** | ✅ 100% | [app/](app/) |
 | **Modelos Eloquent** | ✅ 13 models | [app/Models/](app/Models/) |
-| **Servicios** | ✅ 3 services | [app/Services/](app/Services/) |
-| **Controladores API** | ✅ 3 controllers | [app/Http/Controllers/](app/Http/Controllers/) |
+| **Servicios** | ✅ 4 services | [app/Services/](app/Services/) |
+| **Controladores API** | ✅ 8 controllers | [app/Http/Controllers/](app/Http/Controllers/) |
 | **Migraciones & Seeders** | ✅ 12 tablas | [database/](database/) |
+| **50+ API Endpoints** | ✅ Implementados | [routes/api.php](routes/api.php) |
 | **Docker Compose** | ✅ Completo | [docker-compose.prod.yml](docker-compose.prod.yml) |
-| **Dockerfiles** | ✅ 1 PHP + 1 Nginx | [docker/](docker/) |
+| **Dockerfiles** | ✅ 1 PHP + 1 Nginx + 1 Frontend | [docker/](docker/) |
 | **Deploy Script** | ✅ Automatizado | [deploy.sh](deploy.sh) |
 | **Auto-Migraciones** | ✅ Implementadas | [docker/php/entrypoint.sh](docker/php/entrypoint.sh) |
+| **Frontend Scaffold** | ✅ Nuxt 3 Completo | [frontend/](frontend/) |
+| **Frontend Pages** | ✅ 9 páginas | [frontend/pages/](frontend/pages/) |
+| **Frontend Composables** | ✅ 3 composables | [frontend/composables/](frontend/composables/) |
+| **Frontend Store** | ✅ Pinia auth | [frontend/stores/](frontend/stores/) |
+| **Frontend Components** | ✅ NavBar | [frontend/components/](frontend/components/) |
+| **Frontend Styling** | ✅ Tailwind CSS | [frontend/assets/css/](frontend/assets/css/) |
 | **Documentación Deploy** | ✅ 15+ págs | [DEPLOY.md](DEPLOY.md) |
 | **Configuración .env** | ✅ 2 archivos | [.env.example](.env.example), [.env.production.example](.env.production.example) |
-| **Control de versión** | ✅ 3 commits | [GitHub](https://github.com/henry0295/nexus-saas) |
+| **Control de versión** | ✅ 4 commits | [GitHub](https://github.com/henry0295/nexus-saas) |
 
 ### ⏳ EN PROGRESO / PRÓXIMO
 
 | # | Tarea | Prioridad | Esfuerzo | Fase |
 |----|-------|-----------|----------|------|
-| 1 | **Deploy en servidor Linux** | 🔴 CRÍTICO | 10 min | 3 |
-| 2 | Testing API manual (Postman) | 🔴 CRÍTICO | 30 min | 4 |
-| 3 | SuperadminController + CreditsController | 🟠 Alto | 4h | 5 |
-| 4 | AudioController (360nrs) | 🟠 Alto | 1.5h | 5 |
-| 5 | Crear Frontend Nuxt 3 | 🟠 Alto | 30 min | 6 |
-| 6 | Auth pages (signup/login/verify) | 🟠 Alto | 3h | 6 |
-| 7 | Dashboard pages (SMS, Email, Audio) | 🟠 Alto | 4h | 6 |
-| 8 | AWS SES real integration | 🟡 Medio | 2h | 7 |
-| 9 | AWS SNS real integration | 🟡 Medio | 2h | 7 |
-| 10 | Stripe/PayU integration | 🟡 Medio | 3h | 7 |
-| 11 | Testing suite (PHPUnit/Pest) | 🟡 Medio | 4h | 8 |
-| 12 | E2E testing (Playwright) | 🟡 Medio | 2h | 8 |
-| 13 | CI/CD + GitHub Actions | 🟡 Medio | 3h | 9 |
-| 14 | Production deployment | 🟡 Medio | 1h | 9 |
+| 1 | **Test Frontend localmente (npm install && npm run dev)** | 🔴 CRÍTICO | 20 min | 4 |
+| 2 | Crear email.vue + audio.vue + settings.vue pages | 🔴 CRÍTICO | 3h | 4 |
+| 3 | Testing API manual (Postman) | 🔴 CRÍTICO | 30 min | 5 |
+| 4 | Deploy en servidor Linux | 🔴 CRÍTICO | 10 min | 5 |
+| 5 | Form validation + error handling | 🟠 Alto | 2h | 4 |
+| 6 | Toast notifications + loading states | 🟠 Alto | 1h | 4 |
+| 7 | AWS SES real integration | 🟡 Medio | 2h | 7 |
+| 8 | AWS SNS real integration | 🟡 Medio | 2h | 7 |
+| 9 | Stripe/PayU integration | 🟡 Medio | 3h | 7 |
+| 10 | Testing suite (PHPUnit/Pest) | 🟡 Medio | 4h | 8 |
+| 11 | E2E testing (Playwright) | 🟡 Medio | 2h | 8 |
+| 12 | CI/CD + GitHub Actions | 🟡 Medio | 3h | 9 |
+| 13 | Production deployment | 🟡 Medio | 1h | 9 |
 
 ### 📊 Métricas de Progreso
 
@@ -770,18 +906,19 @@ tests/
 ║                   AVANCE DEL PROYECTO                  ║
 ╠═════════════════════════════════════════════════════════╣
 ║                                                         ║
-║  Backend (Core):       ████████░░ 80%  (Fase 1)       ║
+║  Backend (Core):       ██████████ 100% (Fase 1) ✅    ║
 ║  DevOps (Deploy):      ██████████ 100% (Fase 2) ✅    ║
-║  API Testing:          ░░░░░░░░░░ 0%   (Fase 4)       ║
-║  Frontend (Nuxt):      ░░░░░░░░░░ 0%   (Fase 6)       ║
+║  Frontend (Scaffold):  ████░░░░░░ 40%  (Fase 3) ✨    ║
+║  Frontend (Complete):  ░░░░░░░░░░ 0%   (Fase 4)       ║
+║  API Testing:          ░░░░░░░░░░ 0%   (Fase 5)       ║
 ║  Cloud Integration:    ░░░░░░░░░░ 0%   (Fase 7)       ║
 ║  Testing:              ░░░░░░░░░░ 0%   (Fase 8)       ║
 ║  DevOps/CI-CD:         ░░░░░░░░░░ 0%   (Fase 9)       ║
 ║  ──────────────────────────────────────────────────── ║
-║  TOTAL PROYECTO:       ██████░░░░ 40%                 ║
+║  TOTAL PROYECTO:       ███████░░░ 60%                 ║
 ║                                                         ║
-║  Estimado restante: 50+ horas                          ║
-║  Timeline para MVP: 2-3 semanas (2 devs)              ║
+║  Estimado restante: 30+ horas                          ║
+║  Timeline para MVP: 1-2 semanas (2 devs)              ║
 ║                                                         ║
 ╚═════════════════════════════════════════════════════════╝
 ```
@@ -847,27 +984,32 @@ php artisan serve
 
 ---
 
-## 🎯 CAMBIOS DESDE ÚLTIMA ACTUALIZACIÓN (23 de marzo → 24 de marzo)
+## 🎯 CAMBIOS DESDE ÚLTIMA ACTUALIZACIÓN (24 de marzo → 24 de marzo)
 
 ### Adiciones:
-- ✅ Docker Compose production (4 servicios)
-- ✅ Deploy script automatizado
-- ✅ Auto-migraciones en primer deploy
-- ✅ SSL/TLS autofirmado
-- ✅ Documentación DEPLOY.md (15 páginas)
-- ✅ Multi-distro support (8+ OSes)
-- ✅ Firewall automation
-- ✅ Repositorio Git inicializado
-- ✅ 3 commits con historial limpio
+- ✅ Frontend Nuxt 3 scaffold completo
+- ✅ Proyecto Nuxt inicializado con TypeScript + Tailwind
+- ✅ 9 páginas frontend (landing, login, signup, dashboard, SMS, credits, email stub, audio stub, admin)
+- ✅ Pinia store para autenticación
+- ✅ 3 composables (useApi, useAuth, useCredits)
+- ✅ Route middleware para protección de rutas
+- ✅ NavBar component responsive
+- ✅ Styling completo con Tailwind + custom utilities
+- ✅ Docker support para frontend
+- ✅ Frontend README con instrucciones de setup
+- ✅ Frontend commit a GitHub (cddc765)
 
-### Eliminaciones:
-- ✅ Carpeta duplicada `nexus-saas/` (limpieza)
+### Validaciones:
+- ✅ Frontend comparte configuración API con backend
+- ✅ Auth tokens persisten en localStorage
+- ✅ JWT interceptors automáticos en todas las requests
+- ✅ Role-based access control (superadmin/admin/user)
+- ✅ 401 errors triggean logout + redirect
 
-### Mejoras:
-- ✅ Resolución de problema de espacios en ruta (con Docker)
-- ✅ Arquitectura de deployment profesional
-- ✅ Credenciales generadas automáticamente de forma segura
-- ✅ Migraciones libres de intervención manual
+### Estado:
+- ✅ Backend: 100% (50+ endpoints)
+- ✅ DevOps: 100% (Docker + deploy.sh)
+- ✅ Frontend: 40% (scaffolding completo, falta: email page, audio page, settings page, form validation, testing)
 
 ---
 
@@ -878,14 +1020,11 @@ php artisan serve
 - [DEPLOY.md](DEPLOY.md) - Guía de despliegue
 - [README.md](README.md) - Información del proyecto
 - [ROADMAP.md](ROADMAP.md) - Este archivo
+- [frontend/README.md](frontend/README.md) - Frontend setup
 
-**Próximas actualizaciones del ROADMAP:** Después de completar Fase 4 (Testing API)
-Audio:  Costo $0.05  → Venta $0.07   (Margen 40%)
-```
-
-**Trial credits:** 100 créditos por nuevo registro
+**Próximas actualizaciones del ROADMAP:** Después de completar Fase 4 (Frontend completo + testing)
 
 ---
 
-**Última actualización:** 23/03/2026  
-**Próxima revisión:** Después de resolver bloqueador y ejecutar migraciones
+**Última actualización:** 24/03/2026 (Frontend Scaffold v1)  
+**Próxima revisión:** Después de completar pages faltantes (email, audio, settings)
