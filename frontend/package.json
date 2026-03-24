@@ -1,0 +1,38 @@
+{
+  "name": "nexus-saas-frontend",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "typecheck": "nuxi typecheck",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "dependencies": {
+    "nuxt": "^3.8.0",
+    "vue": "^3.3.0",
+    "@nuxtjs/axios": "^5.13.6",
+    "@pinia/nuxt": "^0.4.11",
+    "pinia": "^2.1.6",
+    "zod": "^3.22.4",
+    "axios": "^1.6.0",
+    "tailwindcss": "^3.3.6",
+    "@headlessui/vue": "^1.7.16"
+  },
+  "devDependencies": {
+    "@nuxt/devtools": "^1.0.8",
+    "typescript": "^5.3.3",
+    "@nuxtjs/tailwindcss": "^6.9.12",
+    "@types/node": "^20.10.4",
+    "postcss": "^8.4.31",
+    "autoprefixer": "^10.4.16",
+    "@typescript-eslint/parser": "^6.13.2",
+    "@typescript-eslint/eslint-plugin": "^6.13.2",
+    "eslint": "^8.55.0",
+    "vue-eslint-parser": "^9.3.2"
+  }
+}
