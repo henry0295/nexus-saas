@@ -13,7 +13,10 @@ RUN apk add --no-cache \
     oniguruma-dev \
     libxml2-dev \
     libzip-dev \
-    supervisor
+    supervisor \
+    autoconf \
+    automake \
+    libtool
 
 # Instalar extensiones PHP necesarias para Laravel
 # Nota: json viene incluido en PHP 8.0+, no necesita compilarse
