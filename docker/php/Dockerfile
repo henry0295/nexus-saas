@@ -54,9 +54,6 @@ RUN composer install --no-interaction --no-progress --no-dev --optimize-autoload
 # Copiar el resto del proyecto DESPUÉS de composer install
 COPY --chown=laravel:laravel . .
 
-# Optimizar autoloading (package:discover se ejecutará en tiempo de ejecución)
-RUN composer dump-autoload --no-interaction --optimize
-
 # Crear directorios necesarios con permisos correctos
 RUN mkdir -p storage/logs bootstrap/cache && \
     chown -R laravel:laravel storage bootstrap
