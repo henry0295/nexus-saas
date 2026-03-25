@@ -49,10 +49,14 @@ WORKDIR /app
 COPY --chown=laravel:laravel composer.json composer.lock ./
 
 # Instalar dependencias PHP ANTES de copiar el .env (que tiene sintaxis shell)
-RUN composer install --no-interaction --no-progress --no-dev --optimize-autoloader
+RUN composer install --no-interaction --no-progress --no-dev --optimize-autoloader --no-scripts
 
 # Copiar el resto del proyecto DESPUÉS de composer install
 COPY --chown=laravel:laravel . .
+
+# Ejecutar los scripts de Composer ahora que el proyecto está completo (para package:discover)
+RUN composer dump-autoload --no-interaction --optimize && \
+    php artisan package:discover --ansi
 
 # Crear directorios necesarios con permisos correctos
 RUN mkdir -p storage/logs bootstrap/cache && \
