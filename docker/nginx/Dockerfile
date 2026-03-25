@@ -13,9 +13,10 @@ RUN mkdir -p /etc/nginx/ssl
 # Copiar configuración
 COPY docker/nginx/default.prod.conf /etc/nginx/conf.d/default.conf
 
-# Crear usuario www-data para Nginx
-RUN addgroup -g 1000 www-data && \
-    adduser -D -u 1000 -G www-data www-data
+# Crear usuario www-data para Nginx (si no existe)
+RUN set -e && \
+    getent group www-data > /dev/null 2>&1 || addgroup -g 1000 www-data && \
+    getent passwd www-data > /dev/null 2>&1 || adduser -D -u 1000 -G www-data www-data || true
 
 # Script de entrada
 COPY docker/nginx/entrypoint.sh /usr/local/bin/entrypoint.sh
