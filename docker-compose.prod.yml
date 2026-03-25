@@ -20,7 +20,7 @@ services:
   # MySQL 8 - Base de Datos
   # ─────────────────────────────────────────────────────────────────────────
   mysql:
-    image: mysql:8.0-alpine
+    image: mysql:8.0
     container_name: nexus_saas_mysql
     hostname: mysql
     restart: unless-stopped
