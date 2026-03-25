@@ -16,23 +16,22 @@ RUN apk add --no-cache \
     supervisor
 
 # Instalar extensiones PHP necesarias para Laravel
+# Nota: json viene incluido en PHP 8.0+, no necesita compilarse
 RUN docker-php-ext-install \
     bcmath \
     ctype \
     fileinfo \
-    json \
     mbstring \
     pdo \
     pdo_mysql \
     pdo_pgsql \
     tokenizer \
     xml \
-    zip
+    zip \
+    opcache
 
-# Instalar extensiones adicionales para mejor rendimiento
-RUN docker-php-ext-install \
-    opcache \
-    redis
+# Instalar extensión Redis desde PECL
+RUN pecl install redis && docker-php-ext-enable redis
 
 # Instalar Composer
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
