@@ -25,7 +25,6 @@ RUN docker-php-ext-install \
     pdo \
     pdo_mysql \
     pdo_pgsql \
-    tokenizer \
     xml \
     zip \
     opcache
