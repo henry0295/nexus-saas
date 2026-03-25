@@ -9,10 +9,10 @@
 #   con soporte para múltiples distribuciones (Ubuntu, Debian, CentOS, etc.)
 #
 # Uso (Recomendado):
-#   curl -sL https://raw.githubusercontent.com/tu-org/nexus-saas/main/deploy.sh | sudo bash -s -- X.X.X.X
+#   curl -sL https://raw.githubusercontent.com/henry0295/nexus-saas/main/deploy.sh | sudo bash -s -- X.X.X.X
 #
 # Uso (Manual):
-#   git clone https://github.com/tu-org/nexus-saas.git
+#   git clone https://github.com/henry0295/nexus-saas.git
 #   cd nexus-saas
 #   chmod +x deploy.sh
 #   sudo bash deploy.sh X.X.X.X
@@ -272,7 +272,13 @@ install_docker() {
                 apt-get update -y
                 apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
                 ;;
-            centos|rhel|rocky|almalinux)
+            rocky|almalinux)
+                dnf remove -y docker docker-client docker-common container-selinux 2>/dev/null || true
+                dnf install -y dnf-plugins-core
+                dnf config-manager --add-repo https://download.docker.com/linux/rhel/docker-ce.repo
+                dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+                ;;
+            centos|rhel)
                 yum remove -y docker docker-client docker-common 2>/dev/null || true
                 yum install -y yum-utils
                 yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
@@ -389,7 +395,7 @@ clone_repo() {
     else
         log_info "Clonando repositorio (rama: $BRANCH)..."
         mkdir -p "$(dirname "$INSTALL_DIR")"
-        git clone -b "$BRANCH" https://github.com/tu-org/nexus-saas.git "$INSTALL_DIR"
+        git clone -b "$BRANCH" https://github.com/henry0295/nexus-saas.git "$INSTALL_DIR"
         cd "$INSTALL_DIR"
     fi
 
