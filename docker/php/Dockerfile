@@ -45,11 +45,14 @@ RUN addgroup -g 1000 laravel && \
 # Establecer directorio de trabajo
 WORKDIR /app
 
-# Copiar archivos del proyecto
-COPY --chown=laravel:laravel . .
+# Copiar archivos de Composer PRIMERO (para aprovechar Docker cache)
+COPY --chown=laravel:laravel composer.json composer.lock ./
 
-# Instalar dependencias PHP
+# Instalar dependencias PHP ANTES de copiar el .env (que tiene sintaxis shell)
 RUN composer install --no-interaction --no-progress --no-dev --optimize-autoloader
+
+# Copiar el resto del proyecto DESPUÉS de composer install
+COPY --chown=laravel:laravel . .
 
 # Crear directorios necesarios con permisos correctos
 RUN mkdir -p storage/logs bootstrap/cache && \
