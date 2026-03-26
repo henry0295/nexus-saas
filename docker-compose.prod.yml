@@ -67,7 +67,7 @@ services:
     networks:
       - nexus-network
     healthcheck:
-      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redis_secure_password}", "--raw", "incr", "ping" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -154,15 +154,16 @@ services:
       - ./docker/nginx/default.prod.conf:/etc/nginx/conf.d/default.conf:ro
       - ./docker/nginx/ssl:/etc/nginx/ssl
     depends_on:
-      - php
+      php:
+        condition: service_healthy
     networks:
       - nexus-network
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost/health" ]
+      test: [ "CMD", "curl", "-sf", "--insecure", "https://localhost" ]
       interval: 30s
       timeout: 5s
       retries: 3
-      start_period: 10s
+      start_period: 30s
 
 # ═════════════════════════════════════════════════════════════════════════════
 # Volúmenes

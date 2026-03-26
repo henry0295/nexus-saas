@@ -423,9 +423,17 @@ generate_env() {
         # Generar nuevas credenciales
         log_info "Generando credenciales nuevas..."
         
+        # ✅ GENERAR TODAS las credenciales ANTES del heredoc
         local DB_PASSWORD=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-25)
         local REDIS_PASSWORD=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-25)
+        local DB_ROOT_PASSWORD=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-25)
         local APP_KEY=$(php artisan key:generate --show 2>/dev/null | grep -oP 'base64:.*' || echo "base64:$(openssl rand -base64 32)")
+        
+        # ✅ EXPORTAR para que docker-compose las pueda usar
+        export DB_PASSWORD
+        export REDIS_PASSWORD
+        export DB_ROOT_PASSWORD
+        export APP_KEY
         
         cat > "$INSTALL_DIR/.env" <<EOF
 APP_NAME="NexusSaaS"
@@ -434,6 +442,17 @@ APP_DEBUG=false
 APP_URL=https://$DEPLOY_IP
 APP_KEY=$APP_KEY
 
+APP_LOCALE=es
+APP_FALLBACK_LOCALE=es
+APP_FAKER_LOCALE=es_CO
+
+BCRYPT_ROUNDS=12
+
+LOG_CHANNEL=stack
+LOG_STACK=single
+LOG_DEPRECATIONS_CHANNEL=null
+LOG_LEVEL=info
+
 # ─── Database ────────────────────
 DB_CONNECTION=mysql
 DB_HOST=mysql
@@ -441,7 +460,7 @@ DB_PORT=3306
 DB_DATABASE=nexus_saas
 DB_USERNAME=nexus_user
 DB_PASSWORD=$DB_PASSWORD
-DB_ROOT_PASSWORD=\$(openssl rand -base64 32)
+DB_ROOT_PASSWORD=$DB_ROOT_PASSWORD
 
 # ─── Cache ───────────────────────
 CACHE_DRIVER=redis
@@ -483,7 +502,7 @@ EOF
 
         chmod 600 "$INSTALL_DIR/.env"
         
-        # Guardar credenciales
+        # ✅ Guardar credenciales (INCLUIDAS DB_ROOT_PASSWORD)
         cat > "$INSTALL_DIR/credentials.txt" <<EOF
 ════════════════════════════════════════════════════════════
             NexusSaaS — Credenciales
@@ -498,6 +517,7 @@ MySQL:
   Database: nexus_saas
   User: nexus_user
   Password: $DB_PASSWORD
+  Root Password: $DB_ROOT_PASSWORD
   Host: mysql (internal)
   Port: 3306
 
@@ -506,8 +526,10 @@ Redis:
   Host: redis (internal)
   Port: 6379
 
+App Key: $APP_KEY
+
 Docker:
-  Status: docker-compose -f docker-compose.prod.yml ps
+  Status: docker compose -f docker-compose.prod.yml ps
   Logs: docker compose -f docker-compose.prod.yml logs -f
   Restart: docker compose -f docker-compose.prod.yml restart
 
@@ -528,22 +550,55 @@ EOF
 configure_firewall() {
     log_info "Configurando firewall..."
 
-    local PORTS="22/tcp 80/tcp 443/tcp 3306/tcp 6379/tcp"
+    # ✅ Solo los puertos públicos
+    local PUBLIC_PORTS="22/tcp 80/tcp 443/tcp"
+    
+    # Puertos internos (NO deben estar en firewall público)
+    # MySQL y Redis solo accesibles dentro de Docker network
+    local INTERNAL_PORTS="3306/tcp 6379/tcp"
 
     if command -v ufw &>/dev/null; then
-        for port in $PORTS; do
+        # Permitir puertos públicos
+        for port in $PUBLIC_PORTS; do
+            log_info "  Permitiendo puerto público: $port"
             ufw allow "$port" 2>/dev/null || true
         done
+        
+        # Bloquear puertos internos (si estaban abiertos)
+        for port in $INTERNAL_PORTS; do
+            log_info "  Bloqueando puerto interno: $port (solo accesible en Docker)"
+            ufw deny "$port" 2>/dev/null || true
+        done
+        
         ufw --force enable 2>/dev/null || true
-        log_success "Firewall UFW configurado"
+        log_success "Firewall UFW configurado correctamente"
+        
     elif command -v firewall-cmd &>/dev/null; then
-        for port in $PORTS; do
+        # Permitir puertos públicos
+        for port in $PUBLIC_PORTS; do
+            log_info "  Permitiendo puerto público: $port"
             firewall-cmd --permanent --add-port="$port" 2>/dev/null || true
         done
+        
+        # Bloquear puertos internos
+        for port in $INTERNAL_PORTS; do
+            log_info "  Bloqueando puerto interno: $port"
+            firewall-cmd --permanent --remove-port="$port" 2>/dev/null || true
+        done
+        
         firewall-cmd --reload 2>/dev/null || true
-        log_success "Firewall firewalld configurado"
+        log_success "Firewall firewalld configurado correctamente"
+        
     else
-        log_warning "No se detectó firewall. Configure puertos manualmente."
+        log_warning "No se detectó firewall (ufw o firewalld)"
+        log_warning "Configure manualmente para SOLO permitir:"
+        log_warning "  - Puerto 22 (SSH)"
+        log_warning "  - Puerto 80 (HTTP)"
+        log_warning "  - Puerto 443 (HTTPS)"
+        log_warning ""
+        log_warning "NO permitir puertos internos:"
+        log_warning "  - Puerto 3306 (MySQL) - Solo accesible en Docker"
+        log_warning "  - Puerto 6379 (Redis) - Solo accesible en Docker"
     fi
 }
 
@@ -670,26 +725,55 @@ post_deploy() {
     
     cd "$INSTALL_DIR"
     
+    # ✅ Recargar credenciales desde .env
+    if [ -f "$INSTALL_DIR/.env" ]; then
+        source "$INSTALL_DIR/.env" 2>/dev/null || true
+    fi
+    
     # Esperar a que MySQL esté completamente listo
-    log_info "Esperando a MySQL..."
+    log_info "Esperando a MySQL (puede tardar hasta 60 segundos)..."
+    local mysql_ready=false
     for i in {1..60}; do
-        if $COMPOSE_CMD -f docker-compose.prod.yml exec -T mysql mysql -h 127.0.0.1 -u root -e "SELECT 1" > /dev/null 2>&1; then
+        # ✅ PASAR la contraseña del root
+        if $COMPOSE_CMD -f docker-compose.prod.yml exec -T mysql mysql \
+            -h 127.0.0.1 -u root \
+            -p"${DB_ROOT_PASSWORD}" \
+            -e "SELECT 1" > /dev/null 2>&1; then
+            log_success "MySQL está disponible"
+            mysql_ready=true
             break
         fi
-        sleep 2
+        printf "  [%2d/60] Esperando MySQL...\r" "$i"
+        sleep 1
     done
     
+    if [ "$mysql_ready" = false ]; then
+        log_error "MySQL no está disponible después de 60 segundos"
+        log_error "Logs de MySQL:"
+        $COMPOSE_CMD -f docker-compose.prod.yml logs --tail=20 mysql
+        return 1
+    fi
+    
+    echo ""
+
     # Ejecutar migraciones
     log_info "Ejecutando migraciones de base de datos..."
-    $COMPOSE_CMD -f docker-compose.prod.yml exec -T php php artisan migrate --force 2>&1 || {
+    if $COMPOSE_CMD -f docker-compose.prod.yml exec -T php php artisan migrate --force 2>&1; then
+        log_success "Migraciones completadas"
+    else
         log_error "Error al ejecutar migraciones"
+        $COMPOSE_CMD -f docker-compose.prod.yml logs --tail=15 php
         return 1
-    }
-    
+    fi
+
     # Ejecutar seeders si está habilitado
     if [ "${RUN_SEEDERS:-false}" = "true" ]; then
         log_info "Ejecutando seeders..."
-        $COMPOSE_CMD -f docker-compose.prod.yml exec -T php php artisan db:seed --force 2>&1 || true
+        if $COMPOSE_CMD -f docker-compose.prod.yml exec -T php php artisan db:seed --force 2>&1; then
+            log_success "Seeders completados"
+        else
+            log_warning "Advertencia: seeders no se completaron correctamente"
+        fi
     fi
     
     # Optimizar aplicación
@@ -697,6 +781,7 @@ post_deploy() {
     $COMPOSE_CMD -f docker-compose.prod.yml exec -T php php artisan config:cache 2>&1 || true
     $COMPOSE_CMD -f docker-compose.prod.yml exec -T php php artisan route:cache 2>&1 || true
     $COMPOSE_CMD -f docker-compose.prod.yml exec -T php php artisan view:cache 2>&1 || true
+    log_success "Aplicación optimizada"
     
     log_success "Post-deploy completado"
 }
