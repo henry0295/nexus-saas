@@ -38,7 +38,7 @@ services:
     networks:
       - nexus-network
     healthcheck:
-      test: ["CMD", "mysql", "-h127.0.0.1", "-uroot", "-proot_secure_password", "-e", "SELECT 1"]
+      test: ["CMD", "mysqladmin", "ping", "-h127.0.0.1", "--silent"]
       interval: 10s
       timeout: 5s
       retries: 10
