@@ -652,6 +652,31 @@ deploy_services() {
     
     cd "$INSTALL_DIR"
     
+    # ✅ CRÍTICO: Cargar variables de entorno desde .env
+    if [ -f "$INSTALL_DIR/.env" ]; then
+        log_info "  Cargando variables de entorno desde .env..."
+        source "$INSTALL_DIR/.env" 2>/dev/null || true
+        
+        # ✅ Validar que DB_ROOT_PASSWORD esté definido
+        if [ -z "$DB_ROOT_PASSWORD" ]; then
+            log_error "ERROR: DB_ROOT_PASSWORD no está definido en .env"
+            log_error "Contenido de .env:"
+            grep -E "^DB_" "$INSTALL_DIR/.env" || echo "  (no DB_* variables found)"
+            exit 1
+        fi
+        
+        # ✅ Exportar todas las variables críticas
+        export DB_PASSWORD
+        export DB_ROOT_PASSWORD
+        export REDIS_PASSWORD
+        export APP_KEY
+        
+        log_success "Variables cargadas correctamente"
+    else
+        log_error "ERROR: .env no existe"
+        exit 1
+    fi
+    
     # Parar servicios anteriores
     $COMPOSE_CMD -f docker-compose.prod.yml down --remove-orphans 2>/dev/null || true
     
