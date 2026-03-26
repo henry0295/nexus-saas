@@ -416,6 +416,21 @@ generate_env() {
         log_info "Archivo .env existente encontrado, reutilizando credenciales..."
         source "$INSTALL_DIR/.env" 2>/dev/null || true
         
+        # ✅ Validar que existan las variables críticas
+        # Si falta DB_ROOT_PASSWORD (.env antiguo), generarla
+        if ! grep -q "^DB_ROOT_PASSWORD=" "$INSTALL_DIR/.env"; then
+            log_warning "  Variable DB_ROOT_PASSWORD no encontrada, generando..."
+            local DB_ROOT_PASSWORD=$(openssl rand -base64 32 | tr -d "=+/" | cut -c1-25)
+            echo "DB_ROOT_PASSWORD=$DB_ROOT_PASSWORD" >> "$INSTALL_DIR/.env"
+            source "$INSTALL_DIR/.env" 2>/dev/null || true
+        fi
+        
+        # ✅ Exportar credenciales para docker-compose
+        export DB_PASSWORD="${DB_PASSWORD}"
+        export DB_ROOT_PASSWORD="${DB_ROOT_PASSWORD}"
+        export REDIS_PASSWORD="${REDIS_PASSWORD}"
+        export APP_KEY="${APP_KEY}"
+        
         # Solo actualizar IP y URLs
         sed -i "s|^APP_URL=.*|APP_URL=https://$DEPLOY_IP|" "$INSTALL_DIR/.env"
         FRESH_ENV=false
