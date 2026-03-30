@@ -56,10 +56,17 @@ mysql:
     dockerfile: docker/mysql/Dockerfile
   ...
   healthcheck:
-    test: ["/usr/local/bin/healthcheck.sh"]
+    test: ["CMD", "/usr/local/bin/healthcheck.sh"]
+    interval: 10s
+    timeout: 5s
+    retries: 10
+    start_period: 80s
 ```
 
-**Razón:** Usar la imagen personalizada y el healthcheck basado en script en lugar de CMD-SHELL.
+**Razón:** 
+- Usar la imagen personalizada en lugar de mariadb:11 directa
+- El healthcheck debe comenzar con "CMD" o "CMD-SHELL" (ahora usa "CMD")
+- El script se ejecuta dentro del contenedor con credenciales disponibles
 
 ---
 
@@ -193,7 +200,7 @@ nginx:
 |---------|--------|--------|
 | `docker/mysql/healthcheck.sh` | ✅ NUEVO | - |
 | `docker/mysql/Dockerfile` | ✅ NUEVO | - |
-| `docker-compose.prod.yml` | Actualizado | 21-26, 162-167 |
+| `docker-compose.prod.yml` | Actualizado | 44-48 (MySQL healthcheck con "CMD") |
 | `docker/php/Dockerfile` | Limpieza | 78-88 |
 | `docker/php/entrypoint.sh` | ✅ Previo | Ya corregido |
 | `deploy.sh` | ✅ Previo | Ya corregido |

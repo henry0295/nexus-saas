@@ -40,7 +40,7 @@ services:
     networks:
       - nexus-network
     healthcheck:
-      test: ["/usr/local/bin/healthcheck.sh"]
+      test: ["CMD", "/usr/local/bin/healthcheck.sh"]
       interval: 10s
       timeout: 5s
       retries: 10
