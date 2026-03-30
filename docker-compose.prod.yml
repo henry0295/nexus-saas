@@ -20,9 +20,7 @@ services:
   # MySQL 8 - Base de Datos
   # ─────────────────────────────────────────────────────────────────────────
   mysql:
-    build:
-      context: .
-      dockerfile: docker/mysql/Dockerfile
+    image: mariadb:11
     container_name: nexus_saas_mysql
     hostname: mysql
     restart: unless-stopped
@@ -40,7 +38,7 @@ services:
     networks:
       - nexus-network
     healthcheck:
-      test: ["CMD", "/usr/local/bin/healthcheck.sh"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "--silent"]
       interval: 10s
       timeout: 5s
       retries: 10

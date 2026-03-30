@@ -4,7 +4,8 @@
 
 El despliegue fallaba con timeout en el healthcheck de MySQL:
 - **Error:** `[177s/180s] nexus_saas_mysql: unhealthy`
-- **Causa:** Variable de entorno `$MYSQL_ROOT_PASSWORD` no se expandía en el healthcheck de Docker Compose
+- **Causa:** Variables de entorno no se expandían en Docker Compose healthchecks complejos
+- **Solución Final:** Usar comando simple de `mysqladmin` sin necesidad de credenciales (conexión socket local)
 
 ---
 
