@@ -76,8 +76,8 @@ EXPOSE 9000
 
 # Healthcheck
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD php -r "exit((extension_loaded('pdo') && extension_loaded('mysql')) ? 0 : 1);" || exit 1
+    CMD php -r "exit((extension_loaded('pdo') && extension_loaded('mysql')) ? 0 : 1);"
 
-# Script de entrada
+# Entrypoint
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["php-fpm"]
