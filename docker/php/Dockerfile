@@ -46,28 +46,29 @@ RUN addgroup -g 1000 laravel && \
 # Establecer directorio de trabajo
 WORKDIR /app
 
-# Copiar archivos de Composer PRIMERO (para aprovechar Docker cache)
-COPY --chown=laravel:laravel composer.json composer.lock ./
+# Copiar archivos de Composer (SIN --chown inicialmente)
+COPY composer.json composer.lock ./
 
-# Instalar dependencias PHP ANTES de copiar el .env (que tiene sintaxis shell)
+# Instalar dependencias PHP como root (evita problemas de permisos)
 RUN composer install --no-interaction --no-progress --no-dev --optimize-autoloader --no-scripts
 
-# Copiar el resto del proyecto DESPUÉS de composer install
-COPY --chown=laravel:laravel . .
+# Copiar el resto del proyecto
+COPY . .
 
 # Crear directorios necesarios con permisos correctos
-RUN mkdir -p storage/logs bootstrap/cache && \
-    chown -R laravel:laravel storage bootstrap
+RUN mkdir -p storage/logs bootstrap/cache
 
-# Crear script de entrada (ANTES de cambiar usuario)
+# Fijar permisos: todo es propiedad de laravel ANTES de cambiar usuario
+RUN chown -R laravel:laravel /app
+
+# Copiar script de entrada (se ejecuta como root)
 COPY docker/php/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh && \
-    chown -R laravel:laravel /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
-# Copiar configuración de PHP (ANTES de cambiar usuario)
+# Copiar configuración de PHP
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/app.ini
 
-# Setup Supervisor para mantener la aplicación corriendo (ANTES de cambiar usuario)
+# Copiar configuración de Supervisor
 COPY docker/php/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Usuario de ejecución
