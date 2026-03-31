@@ -804,12 +804,25 @@ post_deploy() {
 
     # Ejecutar migraciones
     log_info "Ejecutando migraciones de base de datos..."
-    if $COMPOSE_CMD -f docker-compose.prod.yml exec -T php php artisan migrate --force 2>&1; then
-        log_success "Migraciones completadas"
+    
+    # En modo clean, usar migrate:fresh para recrear todas las tablas
+    if [ "$CLEAN_INSTALL" = "true" ]; then
+        if $COMPOSE_CMD -f docker-compose.prod.yml exec -T php php artisan migrate:fresh --force 2>&1; then
+            log_success "Migraciones completadas (nuevo esquema)"
+        else
+            log_error "Error al ejecutar migraciones"
+            $COMPOSE_CMD -f docker-compose.prod.yml logs --tail=15 php
+            return 1
+        fi
     else
-        log_error "Error al ejecutar migraciones"
-        $COMPOSE_CMD -f docker-compose.prod.yml logs --tail=15 php
-        return 1
+        # En modo normal, solo migrar cambios nuevos
+        if $COMPOSE_CMD -f docker-compose.prod.yml exec -T php php artisan migrate --force 2>&1; then
+            log_success "Migraciones completadas"
+        else
+            log_error "Error al ejecutar migraciones"
+            $COMPOSE_CMD -f docker-compose.prod.yml logs --tail=15 php
+            return 1
+        fi
     fi
 
     # Ejecutar seeders si está habilitado
