@@ -10,6 +10,7 @@ RUN apk add --no-cache \
     unzip \
     postgresql-dev \
     mysql-client \
+    netcat-openbsd \
     oniguruma-dev \
     libxml2-dev \
     libzip-dev \
@@ -58,14 +59,15 @@ COPY --chown=laravel:laravel . .
 RUN mkdir -p storage/logs bootstrap/cache && \
     chown -R laravel:laravel storage bootstrap
 
-# Crear script de entrada
+# Crear script de entrada (ANTES de cambiar usuario)
 COPY docker/php/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh && \
+    chown -R laravel:laravel /usr/local/bin/entrypoint.sh
 
-# Copiar configuración de PHP
+# Copiar configuración de PHP (ANTES de cambiar usuario)
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/app.ini
 
-# Setup Supervisor para mantener la aplicación corriendo
+# Setup Supervisor para mantener la aplicación corriendo (ANTES de cambiar usuario)
 COPY docker/php/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Usuario de ejecución
