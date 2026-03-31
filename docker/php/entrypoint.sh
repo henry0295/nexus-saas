@@ -7,6 +7,12 @@ if [ -z "$DB_HOST" ] || [ -z "$DB_DATABASE" ]; then
     exit 1
 fi
 
+# Si vendor no existe, ejecutar composer install
+if [ ! -d "vendor" ]; then
+    echo "Instalando dependencias de Composer..."
+    composer install --no-interaction --no-progress --no-dev --optimize-autoloader --no-scripts
+fi
+
 # Esperar a MySQL
 echo "Esperando a MySQL en $DB_HOST..."
 timeout 180 sh -c "while ! nc -z $DB_HOST 3306; do sleep 1; done" || exit 1
