@@ -765,32 +765,38 @@ post_deploy() {
     
     cd "$INSTALL_DIR"
     
-    # ✅ Recargar credenciales desde .env
-    if [ -f "$INSTALL_DIR/.env" ]; then
-        source "$INSTALL_DIR/.env" 2>/dev/null || true
-    fi
-    
-    # Esperar a que MySQL esté completamente listo
-    log_info "Esperando a MySQL (puede tardar hasta 60 segundos)..."
-    local mysql_ready=false
+    # Esperar a que PHP pueda conectarse a MySQL
+    # (PHP ya tiene todas las credenciales en su entorno)
+    log_info "Esperando a que PHP pueda conectarse a MySQL (máx 60s)..."
+    local php_ready=false
     for i in {1..60}; do
-        # ✅ PASAR la contraseña del root
-        if $COMPOSE_CMD -f docker-compose.prod.yml exec -T mysql mysql \
-            -h 127.0.0.1 -u root \
-            -p"${DB_ROOT_PASSWORD}" \
-            -e "SELECT 1" > /dev/null 2>&1; then
-            log_success "MySQL está disponible"
-            mysql_ready=true
+        # Ejecutar un comando simple de PHP para verificar DB connection
+        if $COMPOSE_CMD -f docker-compose.prod.yml exec -T php php -r "
+            try {
+                \$pdo = new PDO(
+                    'mysql:host=' . getenv('DB_HOST') . ';port=' . getenv('DB_PORT'),
+                    getenv('DB_USERNAME'),
+                    getenv('DB_PASSWORD'),
+                    [PDO::ATTR_TIMEOUT => 3]
+                );
+                \$pdo->query('SELECT 1');
+                exit(0);
+            } catch (Exception \$e) {
+                exit(1);
+            }
+        " > /dev/null 2>&1; then
+            log_success "Base de datos disponible"
+            php_ready=true
             break
         fi
-        printf "  [%2d/60] Esperando MySQL...\r" "$i"
+        printf "  [%2d/60] Esperando DB...\r" "$i"
         sleep 1
     done
     
-    if [ "$mysql_ready" = false ]; then
-        log_error "MySQL no está disponible después de 60 segundos"
-        log_error "Logs de MySQL:"
-        $COMPOSE_CMD -f docker-compose.prod.yml logs --tail=20 mysql
+    if [ "$php_ready" = false ]; then
+        log_error "Base de datos no está disponible después de 60 segundos"
+        log_error "Logs de PHP:"
+        $COMPOSE_CMD -f docker-compose.prod.yml logs --tail=20 php
         return 1
     fi
     
