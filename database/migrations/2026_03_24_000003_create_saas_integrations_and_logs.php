@@ -31,23 +31,25 @@ return new class extends Migration
         // Logs de Email
         Schema::create('email_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tenant_id')->constrained('tenants')->onDelete('cascade');
+            $table->unsignedBigInteger('tenant_id');
             $table->string('recipient');
             $table->string('subject');
             $table->longText('body')->nullable();
             $table->enum('status', ['sent', 'failed', 'bounce', 'complaint', 'open', 'click'])->default('sent');
             $table->json('response')->nullable();
             $table->string('aws_message_id')->nullable();
-            $table->decimal('cost', 10, 6);
+            $table->decimal('cost', 12, 4)->default(0);
             $table->timestamps();
             
+            // Foreign key y índices al final
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->index(['tenant_id', 'created_at']);
         });
 
         // Logs de SMS
         Schema::create('sms_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tenant_id')->constrained('tenants')->onDelete('cascade');
+            $table->unsignedBigInteger('tenant_id');
             $table->string('recipient', 20);
             $table->string('message');
             $table->string('campaign')->nullable();
@@ -55,16 +57,18 @@ return new class extends Migration
             $table->enum('status', ['sent', 'failed', 'delivered', 'bounced', 'read'])->default('sent');
             $table->json('response')->nullable();
             $table->string('aws_message_id')->nullable();
-            $table->decimal('cost', 10, 6);
+            $table->decimal('cost', 12, 4)->default(0);
             $table->timestamps();
             
+            // Foreign key y índices al final
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->index(['tenant_id', 'created_at']);
         });
 
         // Logs de Audio
         Schema::create('audio_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tenant_id')->constrained('tenants')->onDelete('cascade');
+            $table->unsignedBigInteger('tenant_id');
             $table->string('phone_number', 20);
             $table->string('message');
             $table->string('gender')->default('F');
@@ -74,9 +78,11 @@ return new class extends Migration
             $table->integer('duration')->nullable();
             $table->json('response')->nullable();
             $table->string('provider_call_id')->nullable();
-            $table->decimal('cost', 10, 6);
+            $table->decimal('cost', 12, 4)->default(0);
             $table->timestamps();
             
+            // Foreign key y índices al final
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
             $table->index(['tenant_id', 'created_at']);
         });
     }
