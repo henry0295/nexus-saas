@@ -20,19 +20,12 @@ return new class extends Migration
             $table->softDeletes();
         });
 
-        // Tabla de Usuarios (pueden tener múltiples usuarios por tenant)
-        Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('tenant_id')->nullable()->constrained('tenants')->onDelete('cascade');
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->enum('role', ['superadmin', 'admin', 'user'])->default('user');
-            $table->enum('status', ['active', 'suspended'])->default('active');
-            $table->rememberToken();
-            $table->timestamps();
-            $table->softDeletes();
+        // Alterar tabla de Usuarios - agregar campos SaaS
+        Schema::table('users', function (Blueprint $table) {
+            $table->foreignId('tenant_id')->nullable()->after('id')->constrained('tenants')->onDelete('cascade');
+            $table->enum('role', ['superadmin', 'admin', 'user'])->default('user')->after('password');
+            $table->enum('status', ['active', 'suspended'])->default('active')->after('role');
+            $table->softDeletes()->after('updated_at');
             
             $table->index(['tenant_id', 'role']);
         });
@@ -207,7 +200,12 @@ return new class extends Migration
         Schema::dropIfExists('pricing_rules');
         Schema::dropIfExists('credit_transactions');
         Schema::dropIfExists('tenant_credits');
-        Schema::dropIfExists('users');
         Schema::dropIfExists('tenants');
+        
+        // Revertir cambios a tabla users
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropIndex(['tenant_id', 'role']);
+            $table->dropColumn(['tenant_id', 'role', 'status', 'deleted_at']);
+        });
     }
 };
