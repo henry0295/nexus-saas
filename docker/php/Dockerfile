@@ -71,9 +71,6 @@ COPY docker/php/php.ini /usr/local/etc/php/conf.d/app.ini
 # Copiar configuración de Supervisor
 COPY docker/php/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Usuario de ejecución
-USER laravel
-
 # Exponer puerto si se necesita (reservado para healthcheck)
 EXPOSE 9000
 
@@ -81,6 +78,6 @@ EXPOSE 9000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD php -r "exit((extension_loaded('pdo') && extension_loaded('mysql')) ? 0 : 1);"
 
-# Entrypoint
+# Entrypoint (se ejecuta como root para poder crear directorios)
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["php-fpm"]
