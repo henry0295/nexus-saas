@@ -29,7 +29,12 @@ echo "MySQL disponible"
 # Ejecutar migraciones
 if [ "$SKIP_MIGRATIONS" != "true" ]; then
     echo "Ejecutando migraciones..."
-    su -s /bin/sh laravel -c "php artisan migrate --force" || true
+    
+    # Intentar migrar, si falla por tabla corrupta, hacer refresh
+    if ! su -s /bin/sh laravel -c "php artisan migrate --force" 2>&1; then
+        echo "Advertencia: Migration falló, intentando migrate:refresh..."
+        su -s /bin/sh laravel -c "php artisan migrate:refresh --force" || true
+    fi
 fi
 
 # Ejecutar seeders
