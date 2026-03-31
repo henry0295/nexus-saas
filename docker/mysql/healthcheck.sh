@@ -4,9 +4,12 @@
 # Verifica que el servidor está listo aceptando conexiones
 # ═════════════════════════════════════════════════════════════════════════════
 
-# Usar socket local para evitar problemas de contraseña en healthcheck
-if mysqladmin ping -u root --socket=/var/run/mysqld/mysqld.sock 2>/dev/null | grep -q "mysqld is alive"; then
-    exit 0
-else
-    exit 1
-fi
+# Método 1: Intentar ejecutar un comando MySQL simple
+mariadb -u root -e "SELECT 1" >/dev/null 2>&1 && exit 0
+
+# Método 2: Fallback - verificar que el puerto 3306 responde
+timeout 2 bash -c "echo > /dev/tcp/localhost/3306" >/dev/null 2>&1 && exit 0
+
+# Si ambos fallan
+exit 1
+
