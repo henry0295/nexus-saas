@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="${{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>${{ config('app.name', 'NexusSaaS') }}</title>
+    <title>NexusSaaS</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
@@ -49,11 +49,11 @@
 </head>
 <body>
     <div class="container">
-        <h1>?? NexusSaaS</h1>
+        <h1>🚀 NexusSaaS</h1>
         <p>Welcome to NexusSaaS - Your Multi-tenant Business Platform</p>
         
         <div class="status">
-            <strong>? System Status: Operational</strong><br>
+            <strong>✓ System Status: Operational</strong><br>
             Database: Connected<br>
             API: Ready<br>
             Services: All Healthy
