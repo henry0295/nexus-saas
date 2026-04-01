@@ -26,15 +26,10 @@ echo "Esperando a MySQL en $DB_HOST..."
 timeout 180 sh -c "while ! nc -z $DB_HOST 3306; do sleep 1; done" || exit 1
 echo "MySQL disponible"
 
-# Ejecutar migraciones
-if [ "$SKIP_MIGRATIONS" != "true" ]; then
+# Ejecutar migraciones SOLO si está explícitamente habilitado
+if [ "$RUN_MIGRATIONS" = "true" ]; then
     echo "Ejecutando migraciones..."
-    
-    # Intentar migrar, si falla por tabla corrupta, hacer refresh
-    if ! su -s /bin/sh laravel -c "php artisan migrate --force" 2>&1; then
-        echo "Advertencia: Migration falló, intentando migrate:refresh..."
-        su -s /bin/sh laravel -c "php artisan migrate:refresh --force" || true
-    fi
+    su -s /bin/sh laravel -c "php artisan migrate --force" || exit 1
 fi
 
 # Ejecutar seeders
