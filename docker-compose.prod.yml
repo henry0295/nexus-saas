@@ -17,8 +17,6 @@
 name: nexus-saas
 version: '3.8'
 
-env_file: .env  # Carga variables desde .env file
-
 services:
 
   # ─────────────────────────────────────────────────────────────────────────
