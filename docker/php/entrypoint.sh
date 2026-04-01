@@ -40,7 +40,9 @@ fi
 
 # Optimizar aplicación
 echo "Optimizando aplicación..."
-su -s /bin/sh laravel -c "php artisan config:cache" || true
+# DESACTIVADO: config:cache causa problemas al cachear configuración
+# Dejar que Laravel cargue la config sin cachear en tiempo real
+# su -s /bin/sh laravel -c "php artisan config:cache" || true
 su -s /bin/sh laravel -c "php artisan route:cache" || true
 su -s /bin/sh laravel -c "php artisan view:cache" || true
 echo "NexusSaaS listo"
