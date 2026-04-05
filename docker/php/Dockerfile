@@ -19,12 +19,16 @@ RUN apk add --no-cache \
     automake \
     libtool
 
+# Instalar dependencias adicionales para intl
+RUN apk add --no-cache icu-dev
+
 # Instalar extensiones PHP necesarias para Laravel
 # Nota: json viene incluido en PHP 8.0+, no necesita compilarse
 RUN docker-php-ext-install \
     bcmath \
     ctype \
     fileinfo \
+    intl \
     mbstring \
     pdo \
     pdo_mysql \
