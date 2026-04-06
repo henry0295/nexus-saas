@@ -9,7 +9,7 @@ WORKDIR /app
 COPY frontend/package*.json ./
 
 # Instalar dependencias
-RUN npm ci
+RUN npm install
 
 # Copiar código fuente
 COPY frontend/ .
@@ -24,7 +24,7 @@ WORKDIR /app
 
 # Instalar dependencias de producción
 COPY frontend/package*.json ./
-RUN npm ci --production
+RUN npm install --omit=dev
 
 # Copiar output del build
 COPY --from=builder /app/.output ./.output
