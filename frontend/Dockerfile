@@ -1,7 +1,7 @@
 # Frontend Nuxt 3 - Docker Build
 
 # Stage 1: Build
-FROM node:18-alpine as builder
+FROM node:20-alpine as builder
 
 WORKDIR /app
 
@@ -18,7 +18,7 @@ COPY frontend/ .
 RUN npm run build
 
 # Stage 2: Runtime
-FROM node:18-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 
