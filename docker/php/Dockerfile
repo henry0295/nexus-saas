@@ -57,7 +57,8 @@ COPY composer.json composer.lock ./
 RUN composer install --no-interaction --no-progress --no-dev --optimize-autoloader --no-scripts
 
 # Patch: Suprimir warning de tempnam() en Filesystem.php 
-RUN sed -i 's/\$tempPath = tempnam(dirname/\$tempPath = @tempnam(dirname/g' /app/vendor/laravel/framework/src/Illuminate/Filesystem/Filesystem.php
+RUN sed -i 's/\$tempPath = @tempnam(dirname/\$tempPath = @tempnam(dirname/g' /app/vendor/laravel/framework/src/Illuminate/Filesystem/Filesystem.php && \
+    sed -i 's/rename(\$tempPath, \$path);/@rename(\$tempPath, \$path);/g' /app/vendor/laravel/framework/src/Illuminate/Filesystem/Filesystem.php
 
 # Copiar el resto del proyecto
 COPY . .
