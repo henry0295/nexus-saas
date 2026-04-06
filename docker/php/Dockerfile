@@ -56,6 +56,9 @@ COPY composer.json composer.lock ./
 # Instalar dependencias PHP como root (evita problemas de permisos)
 RUN composer install --no-interaction --no-progress --no-dev --optimize-autoloader --no-scripts
 
+# Patch: Suprimir warning de tempnam() en Filesystem.php 
+RUN sed -i 's/\$tempPath = tempnam(dirname/\$tempPath = @tempnam(dirname/g' /app/vendor/laravel/framework/src/Illuminate/Filesystem/Filesystem.php
+
 # Copiar el resto del proyecto
 COPY . .
 
