@@ -64,7 +64,9 @@ RUN sed -i 's/\$tempPath = @tempnam(dirname/\$tempPath = @tempnam(dirname/g' /ap
 COPY . .
 
 # Crear directorios necesarios con permisos correctos
-RUN mkdir -p storage/logs bootstrap/cache
+RUN mkdir -p storage/logs bootstrap/cache && \
+    chmod -R 777 storage && \
+    chmod -R 777 bootstrap/cache
 
 # Fijar permisos: todo es propiedad de laravel ANTES de cambiar usuario
 RUN chown -R laravel:laravel /app
