@@ -68,6 +68,11 @@ class Tenant extends BaseModel
         return $this->hasMany(Invoice::class);
     }
 
+    public function pricingOverrides()
+    {
+        return $this->hasMany(TenantPricingOverride::class);
+    }
+
     public function hasCredit(float $amount): bool
     {
         return $this->credits->balance >= $amount;

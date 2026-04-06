@@ -37,27 +37,25 @@ class InvoiceController
     }
 
     /**
-     * Create a new invoice (from credit purchases)
-     * Note: In real implementation, this would be triggered by successful payment
+     * Create a new invoice
      */
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'credit_transaction_id' => 'required|exists:credit_transactions,id',
-            'amount_due' => 'required|numeric|min:0',
-            'description' => 'nullable|string',
+            'amount' => 'required|numeric|min:0',
+            'period_month' => 'required|integer|min:1|max:12',
+            'period_year' => 'required|integer|min:2026',
+            'due_date' => 'required|date|after:today',
         ]);
 
         $invoice = Invoice::create([
             'tenant_id' => $request->user()->tenant_id,
-            'credit_transaction_id' => $validated['credit_transaction_id'],
             'invoice_number' => $this->generateInvoiceNumber(),
-            'amount_due' => $validated['amount_due'],
-            'amount_paid' => 0,
+            'amount' => $validated['amount'],
+            'period_month' => $validated['period_month'],
+            'period_year' => $validated['period_year'],
             'status' => 'draft',
-            'description' => $validated['description'] ?? null,
-            'issue_date' => now(),
-            'due_date' => now()->addDays(30),
+            'due_date' => $validated['due_date'],
         ]);
 
         return response()->json([
@@ -81,14 +79,12 @@ class InvoiceController
         }
 
         $validated = $request->validate([
-            'amount_paid' => 'required|numeric|min:0',
             'payment_method' => 'nullable|string',
         ]);
 
         $invoice->update([
-            'amount_paid' => $validated['amount_paid'],
             'status' => 'paid',
-            'paid_date' => now(),
+            'paid_at' => now(),
         ]);
 
         return response()->json([
@@ -114,9 +110,9 @@ class InvoiceController
         // In real implementation, this would:
         // 1. Generate PDF from invoice
         // 2. Send via AWS SES
-        // 3. Update invoice sent_at timestamp
+        // 3. Update invoice status
 
-        $invoice->update(['sent_at' => now()]);
+        $invoice->update(['status' => 'sent']);
 
         return response()->json([
             'message' => 'Invoice sent successfully',

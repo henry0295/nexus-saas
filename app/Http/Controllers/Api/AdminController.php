@@ -74,8 +74,8 @@ class AdminController
             'admin_id' => $request->user()->id,
             'tenant_id' => $tenant->id,
             'action' => 'suspend_tenant',
-            'description' => "Suspended tenant: {$tenant->name}",
-            'metadata' => json_encode(['tenant_name' => $tenant->name, 'tenant_id' => $tenant->id]),
+            'new_data' => json_encode(['status' => 'suspended']),
+            'old_data' => json_encode(['status' => $tenant->getOriginal('status')]),
         ]);
 
         return response()->json([
@@ -100,8 +100,8 @@ class AdminController
             'admin_id' => $request->user()->id,
             'tenant_id' => $tenant->id,
             'action' => 'activate_tenant',
-            'description' => "Activated tenant: {$tenant->name}",
-            'metadata' => json_encode(['tenant_name' => $tenant->name, 'tenant_id' => $tenant->id]),
+            'new_data' => json_encode(['status' => 'active']),
+            'old_data' => json_encode(['status' => $tenant->getOriginal('status')]),
         ]);
 
         return response()->json([
@@ -121,25 +121,26 @@ class AdminController
 
         $validated = $request->validate([
             'channel' => 'required|in:sms,email,audio',
-            'aws_cost' => 'required|numeric|min:0',
-            'margin_percentage' => 'required|numeric|min:0|max:100',
+            'provider' => 'nullable|in:aws,twilio,360nrs',
+            'cost_per_unit' => 'required|numeric|min:0',
+            'margin_percent' => 'required|numeric|min:0|max:100',
             'selling_price' => 'required|numeric|min:0',
         ]);
 
         $rule = PricingRule::create([
             'channel' => $validated['channel'],
-            'aws_cost' => $validated['aws_cost'],
-            'margin_percentage' => $validated['margin_percentage'],
+            'provider' => $validated['provider'] ?? 'aws',
+            'cost_per_unit' => $validated['cost_per_unit'],
+            'margin_percent' => $validated['margin_percent'],
             'selling_price' => $validated['selling_price'],
-            'created_by' => $request->user()->id,
+            'updated_by_admin' => $request->user()->id,
         ]);
 
         // Log the action
         AuditLog::create([
             'admin_id' => $request->user()->id,
             'action' => 'create_pricing_rule',
-            'description' => "Created pricing rule for {$validated['channel']}",
-            'metadata' => json_encode($validated),
+            'new_data' => json_encode($validated),
         ]);
 
         return response()->json([
@@ -158,19 +159,22 @@ class AdminController
         }
 
         $validated = $request->validate([
-            'aws_cost' => 'nullable|numeric|min:0',
-            'margin_percentage' => 'nullable|numeric|min:0|max:100',
+            'cost_per_unit' => 'nullable|numeric|min:0',
+            'margin_percent' => 'nullable|numeric|min:0|max:100',
             'selling_price' => 'nullable|numeric|min:0',
         ]);
 
-        $pricingRule->update($validated);
+        $updateData = array_filter($validated);
+        if (!empty($updateData)) {
+            $updateData['updated_by_admin'] = $request->user()->id;
+            $pricingRule->update($updateData);
+        }
 
         // Log the action
         AuditLog::create([
             'admin_id' => $request->user()->id,
             'action' => 'update_pricing_rule',
-            'description' => "Updated pricing rule for {$pricingRule->channel}",
-            'metadata' => json_encode($validated),
+            'new_data' => json_encode($updateData ?? $validated),
         ]);
 
         return response()->json([
@@ -210,7 +214,7 @@ class AdminController
         $override = TenantPricingOverride::updateOrCreate(
             ['tenant_id' => $tenant->id, 'channel' => $validated['channel']],
             [
-                'override_price' => $validated['override_price'],
+                'custom_price' => $validated['override_price'],
                 'reason' => $validated['reason'] ?? null,
             ]
         );
@@ -220,8 +224,7 @@ class AdminController
             'admin_id' => $request->user()->id,
             'tenant_id' => $tenant->id,
             'action' => 'set_pricing_override',
-            'description' => "Set VIP pricing for {$tenant->name} - {$validated['channel']}",
-            'metadata' => json_encode($validated),
+            'new_data' => json_encode($validated),
         ]);
 
         return response()->json([
@@ -252,8 +255,7 @@ class AdminController
             'admin_id' => $request->user()->id,
             'tenant_id' => $tenant->id,
             'action' => 'delete_pricing_override',
-            'description' => "Removed VIP pricing for {$tenant->name} - {$validated['channel']}",
-            'metadata' => json_encode($validated),
+            'new_data' => json_encode(['deleted' => true, 'channel' => $validated['channel']]),
         ]);
 
         return response()->json(['message' => 'Pricing override removed']);
