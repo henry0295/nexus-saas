@@ -8,13 +8,13 @@ WORKDIR /app
 # Copiar package.json
 COPY frontend/package*.json ./
 
-# Instalar dependencias
+# Instalar TODAS las dependencias (incluyendo dev)
 RUN npm install
 
 # Copiar código fuente
 COPY frontend/ .
 
-# Build
+# Build Nuxt
 RUN npm run build
 
 # Stage 2: Runtime
@@ -22,11 +22,11 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Instalar dependencias de producción
+# Instalar solo dependencias de producción para runtime
 COPY frontend/package*.json ./
 RUN npm install --omit=dev
 
-# Copiar output del build
+# Copiar output del build desde builder
 COPY --from=builder /app/.output ./.output
 
 # Exponer puerto
