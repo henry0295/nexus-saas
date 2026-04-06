@@ -101,10 +101,10 @@ services:
       DB_USERNAME: ${DB_USERNAME:-nexus_user}
       DB_PASSWORD: ${DB_PASSWORD:-mysql_secure_password}
       
-      CACHE_DRIVER: ${CACHE_DRIVER:-file}
-      CACHE_STORE: ${CACHE_STORE:-file}
+      CACHE_DRIVER: file
+      CACHE_STORE: file
       
-      SESSION_DRIVER: ${SESSION_DRIVER:-file}
+      SESSION_DRIVER: file
       REDIS_HOST: redis
       REDIS_PASSWORD: ${REDIS_PASSWORD:-redis_secure_password}
       REDIS_PORT: 6379
@@ -121,7 +121,6 @@ services:
       TZ: ${TZ:-America/Bogota}
       SKIP_MIGRATIONS: ${SKIP_MIGRATIONS:-false}
       RUN_SEEDERS: ${RUN_SEEDERS:-false}
-    env_file: .env
     depends_on:
       mysql:
         condition: service_healthy
