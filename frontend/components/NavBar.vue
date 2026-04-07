@@ -125,6 +125,9 @@
 </template>
 
 <script setup lang="ts">
+import { useAuthStore } from '~/stores/auth'
+import { useAuth } from '~/composables/useAuth'
+
 const auth = useAuthStore()
 const mobileMenuOpen = ref(false)
 const { logout } = useAuth()

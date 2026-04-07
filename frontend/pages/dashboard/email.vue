@@ -102,7 +102,7 @@
 
         <div class="card">
           <p class="text-gray-600 text-sm">Saldo Disponible</p>
-          <p class="text-3xl font-bold text-green-600">{{ credits.balance || 0 }}</p>
+          <p class="text-3xl font-bold text-green-600">{{ credits?.value?.balance || 0 }}</p>
         </div>
 
         <div class="card bg-blue-50">
@@ -135,7 +135,7 @@ const loading = ref(false)
 const error = ref<string | null>(null)
 const success = ref(false)
 const api = useApi()
-const { credits } = useCredits()
+const { credits, getBalance } = useCredits()
 
 const recipientCount = computed(() => {
   return form.recipients
@@ -165,7 +165,7 @@ const sendEmail = async () => {
     return
   }
 
-  if (estimatedCost.value > credits.balance.value) {
+  if (estimatedCost.value > (credits.value?.balance || 0)) {
     error.value = 'Saldo insuficiente'
     return
   }
@@ -204,7 +204,7 @@ const sendEmail = async () => {
     }, 3000)
 
     // Refresh credits
-    await credits.getBalance()
+    await getBalance()
   } catch (err: any) {
     error.value = err.response?.data?.error || 'Error al enviar correos'
   } finally {

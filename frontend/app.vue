@@ -8,6 +8,8 @@
 </template>
 
 <script setup lang="ts">
+import { useAuthStore } from '~/stores/auth'
+
 // Hydrate auth store on app load
 const auth = useAuthStore()
 

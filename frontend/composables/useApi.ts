@@ -1,5 +1,7 @@
 import type { AxiosInstance } from 'axios'
 import axios from 'axios'
+import { useRuntimeConfig } from '#app'
+import { useAuthStore } from '~/stores/auth'
 
 let apiClient: AxiosInstance | null = null
 

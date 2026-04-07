@@ -208,6 +208,9 @@
 </template>
 
 <script setup lang="ts">
+import { useAuthStore } from '~/stores/auth'
+import { useApi } from '~/composables/useApi'
+
 definePageMeta({
   middleware: 'auth',
 })

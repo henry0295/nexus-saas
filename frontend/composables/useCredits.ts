@@ -1,6 +1,11 @@
+interface CreditsData {
+  balance: number
+  transactions?: any[]
+}
+
 export const useCredits = () => {
-  const api = useApi()
-  const credits = ref<any>(null)
+  const apiInstance = useApi()
+  const credits = ref<CreditsData | null>(null)
   const packages = ref<any[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
@@ -8,7 +13,7 @@ export const useCredits = () => {
   const getBalance = async () => {
     loading.value = true
     try {
-      const response = await api.get('/credits/balance')
+      const response = await apiInstance.get('/credits/balance')
       credits.value = response.data
       error.value = null
       return response.data
@@ -23,7 +28,7 @@ export const useCredits = () => {
   const getPackages = async () => {
     loading.value = true
     try {
-      const response = await api.get('/credits/packages')
+      const response = await apiInstance.get('/credits/packages')
       packages.value = response.data.packages
       error.value = null
       return response.data.packages
@@ -38,7 +43,7 @@ export const useCredits = () => {
   const purchaseCredits = async (packageId: string, paymentMethod?: string) => {
     loading.value = true
     try {
-      const response = await api.post('/credits/purchase', {
+      const response = await apiInstance.post('/credits/purchase', {
         package_id: packageId,
         payment_method: paymentMethod || 'credit_card',
       })
@@ -55,7 +60,7 @@ export const useCredits = () => {
   const getTransactions = async (page: number = 1) => {
     loading.value = true
     try {
-      const response = await api.get(`/credits/transactions?page=${page}`)
+      const response = await apiInstance.get(`/credits/transactions?page=${page}`)
       error.value = null
       return response.data
     } catch (err: any) {
