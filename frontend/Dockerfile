@@ -25,10 +25,6 @@ WORKDIR /app
 # Instalar curl para healthcheck
 RUN apk add --no-cache curl
 
-# Instalar solo dependencias de producción para runtime
-COPY frontend/package*.json ./
-RUN npm install --omit=dev
-
 # Copiar output del build desde builder
 COPY --from=builder /app/.output ./.output
 
