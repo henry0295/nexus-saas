@@ -39,7 +39,7 @@
       <div class="flex items-center justify-between">
         <div>
           <p class="text-gray-600">Créditos disponibles</p>
-          <p class="text-4xl font-bold text-green-600">{{ credits?.value?.balance || 0 }}</p>
+          <p class="text-4xl font-bold text-green-600">{{ credits?.balance || 0 }}</p>
         </div>
         <div class="text-5xl">💰</div>
       </div>
@@ -123,7 +123,7 @@ const purchase = async (packageId: string) => {
     // por ahora mostramos el mensaje de éxito
     error.value = null
   } else {
-    error.value = result.error
+    error.value = result.error || null
   }
 
   loading.value = false

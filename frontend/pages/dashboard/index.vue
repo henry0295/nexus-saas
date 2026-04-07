@@ -16,7 +16,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-gray-600 text-sm">Saldo de Créditos</p>
-            <p class="text-3xl font-bold text-gray-900">{{ credits?.value?.balance || 0 }}</p>
+            <p class="text-3xl font-bold text-gray-900">{{ credits?.balance || 0 }}</p>
           </div>
           <div class="text-3xl">💰</div>
         </div>
@@ -26,7 +26,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-gray-600 text-sm">Total Gastado</p>
-            <p class="text-3xl font-bold text-gray-900">{{ credits?.value?.totalUsed || 0 }}</p>
+            <p class="text-3xl font-bold text-gray-900">{{ credits?.totalUsed || 0 }}</p>
           </div>
           <div class="text-3xl">📊</div>
         </div>

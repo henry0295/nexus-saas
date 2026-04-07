@@ -108,7 +108,7 @@
 
         <div class="card">
           <p class="text-gray-600 text-sm">Saldo Disponible</p>
-          <p class="text-3xl font-bold text-green-600">{{ credits?.value?.balance || 0 }}</p>
+          <p class="text-3xl font-bold text-green-600">{{ credits?.balance || 0 }}</p>
         </div>
 
         <div class="card bg-blue-50">
@@ -179,7 +179,7 @@ const sendAudio = async () => {
     return
   }
 
-  if (estimatedCost.value > (credits.value?.balance || 0)) {
+  if (estimatedCost.value > (credits?.balance || 0)) {
     error.value = 'Saldo insuficiente'
     return
   }

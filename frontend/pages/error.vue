@@ -33,7 +33,6 @@
 
 <script setup lang="ts">
 import type { NuxtError } from '#app'
-import { clearError } from '#app'
 
 const props = defineProps({
   error: {

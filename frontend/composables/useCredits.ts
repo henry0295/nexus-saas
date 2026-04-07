@@ -77,10 +77,10 @@ export const useCredits = () => {
   })
 
   return {
-    credits: readonly(credits),
-    packages: readonly(packages),
-    loading: readonly(loading),
-    error: readonly(error),
+    credits,
+    packages,
+    loading,
+    error,
     getBalance,
     getPackages,
     purchaseCredits,
