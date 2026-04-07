@@ -22,8 +22,12 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Instalar curl para healthcheck
-RUN apk add --no-cache curl
+# Instalar curl y netstat para healthcheck diagnostics
+RUN apk add --no-cache curl net-tools
+
+# Copiar healthcheck script
+COPY docker/frontend/healthcheck.sh /usr/local/bin/healthcheck.sh
+RUN chmod +x /usr/local/bin/healthcheck.sh
 
 # Copiar output del build desde builder
 COPY --from=builder /app/.output ./.output
