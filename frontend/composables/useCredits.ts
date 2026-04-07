@@ -1,5 +1,6 @@
 interface CreditsData {
   balance: number
+  totalUsed?: number
   transactions?: any[]
 }
 

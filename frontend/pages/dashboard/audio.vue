@@ -179,7 +179,7 @@ const sendAudio = async () => {
     return
   }
 
-  if (estimatedCost.value > (credits?.balance || 0)) {
+  if (estimatedCost.value > (credits.value?.balance || 0)) {
     error.value = 'Saldo insuficiente'
     return
   }

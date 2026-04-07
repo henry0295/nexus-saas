@@ -32,11 +32,9 @@
 </template>
 
 <script setup lang="ts">
-import type { NuxtError } from '#app'
-
 const props = defineProps({
   error: {
-    type: Object as () => Partial<NuxtError>,
+    type: Object,
     required: true
   }
 })
