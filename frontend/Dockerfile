@@ -29,7 +29,8 @@ RUN apk add --no-cache curl net-tools
 COPY docker/frontend/healthcheck.sh /usr/local/bin/healthcheck.sh
 RUN chmod +x /usr/local/bin/healthcheck.sh
 
-# Copiar output del build desde builder
+# Copiar node_modules y output del build desde builder
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/.output ./.output
 
 # Exponer puerto
