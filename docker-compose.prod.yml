@@ -91,14 +91,23 @@ services:
       NUXT_PUBLIC_API_BASE_URL: ${APP_URL:-https://localhost}/api
       HOST: 0.0.0.0
       PORT: 3000
+      NODE_ENV: production
     networks:
       - nexus-network
     healthcheck:
       test: [ "CMD", "/usr/local/bin/healthcheck.sh" ]
       interval: 10s
-      timeout: 3s
-      retries: 30
-      start_period: 120s
+      timeout: 5s
+      retries: 40
+      start_period: 180s
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
 
   # ─────────────────────────────────────────────────────────────────────────
   # PHP-FPM - Laravel Application

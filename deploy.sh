@@ -708,12 +708,32 @@ deploy_services() {
         sleep 10
     fi
     
-    # Iniciar Nginx
+    # Iniciar Frontend (Nuxt)
+    log_info "Iniciando Frontend (Nuxt SSR)..."
+    $COMPOSE_CMD -f docker-compose.prod.yml up -d frontend 2>&1
+    
+    if ! wait_container_healthy "nexus_saas_frontend" 240; then
+        log_error "Frontend no se inició correctamente después de 240 segundos"
+        log_error "Logs del Frontend:"
+        $COMPOSE_CMD -f docker-compose.prod.yml logs --tail=100 frontend
+        log_error ""
+        log_error "Debugging adicional del Frontend:"
+        log_error "  1. Limpia volúmenes y reinicia:"
+        log_error "     docker compose -f docker-compose.prod.yml down"
+        log_error "     sudo bash FRONTEND_DIAGNOSTICS.sh"
+        log_error "  2. O rebuild completo:"
+        log_error "     cd $INSTALL_DIR && sudo bash deploy.sh --clean $DEPLOY_IP"
+        exit 1
+    fi
+    
+    # Iniciar Nginx (depende de PHP y Frontend)
     log_info "Iniciando Nginx..."
     $COMPOSE_CMD -f docker-compose.prod.yml up -d nginx 2>&1
     
     if ! wait_container_healthy "nexus_saas_nginx" 60; then
-        log_warning "Nginx aún no reporta healthy"
+        log_warning "Nginx aún no reporta healthy — revisando logs:"
+        $COMPOSE_CMD -f docker-compose.prod.yml logs --tail=40 nginx
+        sleep 10
     fi
     
     log_success "Servicios desplegados"
