@@ -19,7 +19,7 @@ interface Tenant {
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null as User | null,
-    token: localStorage?.getItem('auth_token') || null,
+    token: null as string | null,
     tenant: null as Tenant | null,
   }),
 
@@ -62,3 +62,4 @@ export const useAuthStore = defineStore('auth', {
     },
   },
 })
+
