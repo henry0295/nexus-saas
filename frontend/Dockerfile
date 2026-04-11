@@ -1,7 +1,7 @@
 # Frontend Nuxt 3 - Docker Build
 
 # Stage 1: Build
-FROM node:20-alpine as builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
@@ -92,14 +92,14 @@ if ! node .output/server/index.mjs; then
 fi
 STARTUP_EOF
 
-chmod +x /usr/local/bin/startup.sh
+RUN chmod +x /usr/local/bin/startup.sh
 
 # Copiar node_modules y output del build desde builder
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/.output ./.output
 
 # Validar que .output fue copiado
-echo "[VALIDATE] Checking .output..." && \
+RUN echo "[VALIDATE] Checking .output..." && \
     ls -la .output/server/ && \
     echo "[VALIDATE] ✓ .output is present" || \
     (echo "[ERROR] .output validation failed!" && exit 1)
