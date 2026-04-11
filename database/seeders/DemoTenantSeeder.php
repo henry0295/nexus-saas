@@ -19,7 +19,7 @@ class DemoTenantSeeder extends Seeder
             'name' => 'ACME Corporation Demo',
             'email' => 'admin@acme-demo.com',
             'status' => 'active',
-            'plan' => 'professional',
+            'plan' => 'pro',
         ]);
 
         echo "\n✅ Tenant created: {$tenant->name} (ID: {$tenant->id})\n";
