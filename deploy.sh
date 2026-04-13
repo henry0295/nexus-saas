@@ -845,9 +845,19 @@ post_deploy() {
         fi
     fi
 
-    # Ejecutar seeders si está habilitado
+    # ✅ Ejecutar SuperadminSeeder SIEMPRE en instalaciones limpias
+    if [ "$CLEAN_INSTALL" = "true" ]; then
+        log_info "Creando usuario superadmin..."
+        if $COMPOSE_CMD -f docker-compose.prod.yml exec -T php php artisan db:seed --class=SuperadminSeeder --force 2>&1; then
+            log_success "Usuario superadmin creado exitosamente"
+        else
+            log_warning "Advertencia: no se pudo crear el usuario superadmin"
+        fi
+    fi
+    
+    # Ejecutar seeders adicionales si está habilitado
     if [ "${RUN_SEEDERS:-false}" = "true" ]; then
-        log_info "Ejecutando seeders..."
+        log_info "Ejecutando seeders adicionales..."
         if $COMPOSE_CMD -f docker-compose.prod.yml exec -T php php artisan db:seed --force 2>&1; then
             log_success "Seeders completados"
         else
