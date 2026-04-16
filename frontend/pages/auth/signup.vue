@@ -101,10 +101,6 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({
-  middleware: 'auth',
-})
-
 const form = reactive({
   companyName: '',
   email: '',
