@@ -150,8 +150,8 @@
         </div>
       </div>
 
-      <!-- Integrations -->
-      <div class="card">
+      <!-- Integrations (Only for Admin/SuperAdmin) -->
+      <div v-if="authStore.isAdmin" class="card">
         <h2 class="text-xl font-semibold text-gray-900 mb-6">Integraciones</h2>
         <div class="space-y-4">
           <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">

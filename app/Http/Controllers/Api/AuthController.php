@@ -97,4 +97,26 @@ class AuthController
             'credits' => $request->user()->tenant?->credits,
         ]);
     }
+
+    public function verifySender(string $token)
+    {
+        $sender = \App\Models\EmailSender::where('verification_token', $token)->first();
+
+        if (!$sender) {
+            return response()->json([
+                'error' => 'Token de verificación inválido',
+            ], 404);
+        }
+
+        $sender->update([
+            'verified' => true,
+            'verified_at' => now(),
+            'verification_token' => null,
+        ]);
+
+        return response()->json([
+            'message' => 'Remitente verificado exitosamente',
+            'data' => $sender,
+        ]);
+    }
 }

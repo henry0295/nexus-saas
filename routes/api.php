@@ -8,12 +8,18 @@ use App\Http\Controllers\Api\CreditsController;
 use App\Http\Controllers\Api\TenantController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\InvoiceController;
+use App\Http\Controllers\Api\EmailTemplateController;
+use App\Http\Controllers\Api\SmsTemplateController;
+use App\Http\Controllers\Api\EmailSenderController;
+use App\Http\Controllers\Api\EmailDomainController;
+use App\Http\Controllers\Api\DashboardStatsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
+Route::get('/auth/verify-sender/{token}', [EmailSenderController::class, 'verifySender']);
 
 // Protected routes (requieren autenticación)
 Route::middleware('auth:sanctum')->group(function () {
@@ -35,6 +41,33 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/audio/bulk', [AudioController::class, 'bulk']);
     Route::get('/audio/logs', [AudioController::class, 'logs']);
     Route::get('/audio/logs/{audioLog}', [AudioController::class, 'show']);
+
+    // Email Templates routes
+    Route::get('/email-templates', [EmailTemplateController::class, 'index']);
+    Route::post('/email-templates', [EmailTemplateController::class, 'store']);
+    Route::put('/email-templates/{emailTemplate}', [EmailTemplateController::class, 'update']);
+    Route::delete('/email-templates/{emailTemplate}', [EmailTemplateController::class, 'destroy']);
+
+    // SMS Templates routes
+    Route::get('/sms-templates', [SmsTemplateController::class, 'index']);
+    Route::post('/sms-templates', [SmsTemplateController::class, 'store']);
+    Route::put('/sms-templates/{smsTemplate}', [SmsTemplateController::class, 'update']);
+    Route::delete('/sms-templates/{smsTemplate}', [SmsTemplateController::class, 'destroy']);
+
+    // Email Senders routes
+    Route::get('/email-senders', [EmailSenderController::class, 'index']);
+    Route::post('/email-senders', [EmailSenderController::class, 'store']);
+    Route::post('/email-senders/{emailSender}/resend-verification', [EmailSenderController::class, 'resendVerification']);
+    Route::delete('/email-senders/{emailSender}', [EmailSenderController::class, 'destroy']);
+
+    // Email Domains routes
+    Route::get('/email-domains', [EmailDomainController::class, 'index']);
+    Route::post('/email-domains', [EmailDomainController::class, 'store']);
+    Route::post('/email-domains/{emailDomain}/verify', [EmailDomainController::class, 'verifyDomain']);
+    Route::delete('/email-domains/{emailDomain}', [EmailDomainController::class, 'destroy']);
+
+    // Dashboard Stats routes
+    Route::get('/dashboard/stats', [DashboardStatsController::class, 'index']);
 
     // Credits routes
     Route::get('/credits/balance', function (Request $request) {
@@ -78,3 +111,4 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/analytics', [AdminController::class, 'analytics']);
     });
 });
+

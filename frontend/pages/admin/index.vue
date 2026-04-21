@@ -109,8 +109,8 @@ definePageMeta({
 
 const auth = useAuthStore()
 
-// Verificar que es admin
-if (!auth.isAdmin) {
+// Verificar que es superadmin
+if (!auth.isSuperAdmin) {
   navigateTo('/dashboard')
 }
 

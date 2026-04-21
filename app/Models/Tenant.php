@@ -48,6 +48,31 @@ class Tenant extends BaseModel
         return $this->hasMany(EmailLog::class);
     }
 
+    public function emailTemplates()
+    {
+        return $this->hasMany(EmailTemplate::class);
+    }
+
+    public function smsTemplates()
+    {
+        return $this->hasMany(SmsTemplate::class);
+    }
+
+    public function emailSenders()
+    {
+        return $this->hasMany(EmailSender::class);
+    }
+
+    public function emailDomains()
+    {
+        return $this->hasMany(EmailDomain::class);
+    }
+
+    public function campaignLogs()
+    {
+        return $this->hasMany(CampaignLog::class);
+    }
+
     public function smsLogs()
     {
         return $this->hasMany(SmsLog::class);
