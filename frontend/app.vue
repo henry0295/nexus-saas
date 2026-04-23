@@ -13,6 +13,12 @@ import { useAuthStore } from '~/stores/auth'
 // Hydrate auth store on app load
 const auth = useAuthStore()
 
+// Hydrate immediately on client side
+if (process.client) {
+  auth.hydrate()
+}
+
+// Also hydrate on mount for SSR safety
 onMounted(() => {
   auth.hydrate()
 })

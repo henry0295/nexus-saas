@@ -12,7 +12,9 @@ Route::get('/test', function () {
     ]);
 });
 
-// Welcome route with view
-Route::get('/', function () {
-    return view('welcome');
+// Redirect all web routes to Nuxt (handled by nginx proxy)
+// This prevents Laravel from serving any pages - all UI is handled by Nuxt via API
+Route::fallback(function () {
+    // This is handled by nginx @frontend fallback which proxies to Nuxt
+    abort(404);
 });

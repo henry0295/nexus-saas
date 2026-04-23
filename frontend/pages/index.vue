@@ -1,5 +1,22 @@
 <template>
-  <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white">
+  <!-- If authenticated, show dashboard redirect message; otherwise show landing page -->
+  <div v-if="!isLoaded" class="flex items-center justify-center min-h-screen bg-gray-100">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+      <p class="text-gray-600">Cargando...</p>
+    </div>
+  </div>
+
+  <div v-else-if="auth.isAuthenticated" class="flex items-center justify-center min-h-screen bg-gray-100">
+    <div class="text-center">
+      <p class="text-gray-600 mb-4">Redirigiendo al dashboard...</p>
+      <NuxtLink to="/dashboard" class="btn-primary">
+        Ir al Dashboard
+      </NuxtLink>
+    </div>
+  </div>
+
+  <div v-else class="bg-gradient-to-r from-blue-600 to-blue-800 text-white">
     <!-- Hero Section -->
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
@@ -92,7 +109,30 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
+import { useAuthStore } from '~/stores/auth'
+
 definePageMeta({
   layout: false,
 })
+
+const auth = useAuthStore()
+const isLoaded = ref(false)
+
+// Check authentication after hydration on client side
+onMounted(() => {
+  // Hydrate auth state from localStorage
+  auth.hydrate()
+  isLoaded.value = true
+  
+  // If authenticated, redirect to dashboard
+  if (auth.isAuthenticated) {
+    navigateTo('/dashboard')
+  }
+})
+
+// Ensure hydration happens immediately if already mounted
+if (process.client && typeof window !== 'undefined') {
+  auth.hydrate()
+}
 </script>

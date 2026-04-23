@@ -186,7 +186,7 @@
             </div>
 
             <div class="bg-blue-50 p-3 rounded-lg">
-              <p class="text-sm text-blue-800">💡 Puedes usar variables como {{nombre}}, {{fecha}}, {{hora}}</p>
+              <p class="text-sm text-blue-800">💡 Puedes usar variables como &#123;&#123;nombre&#125;&#125;, &#123;&#123;fecha&#125;&#125;, &#123;&#123;hora&#125;&#125;</p>
             </div>
 
             <div class="flex gap-2 justify-end">
@@ -235,7 +235,7 @@ const success = ref(false)
 const api = useApi()
 const { credits } = useCredits()
 
-const templates = ref([])
+const templates = ref([] as any[])
 
 const recipientCount = computed(() => {
   return form.recipients
